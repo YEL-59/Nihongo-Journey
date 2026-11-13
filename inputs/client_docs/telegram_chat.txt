@@ -1,0 +1,3 @@
+# Paste your exported Telegram chat here.
+# You do NOT need to clean it up - greetings, timestamps, and voice notes can stay.
+# The AI parser will automatically filter noise and extract finalized feature changes.

@@ -1,0 +1,4 @@
+# Paste exported client revision chat messages here.
+# Both messages.html (Telegram Desktop native export) and telegram_chat.txt are supported.
+# Greetings and timestamps can stay; the AI will automatically filter the real revision requests.
+
