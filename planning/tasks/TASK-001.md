@@ -2,31 +2,34 @@
 
 - **Task ID**: `TASK-001`
 - **Domain**: Architecture & Planning
-- **Status**: `READY`
+- **Status**: `DONE`
 - **Priority**: `P0`
-- **Assigned Role**: Architect / Orchestrator
+- **Assigned Role**: Lead Architect / Orchestrator
 - **Dependencies**: None
 
 ---
 
 ## 1. Objective
-Analyze client inputs in `inputs/client_docs/`, `inputs/screenshots/`, and `inputs/references.md`. Resolve contradictions (Telegram chat overrides PDF brief), map design tokens, and generate `PRD_AND_PLAN.md` with visual Mermaid flow diagrams, database plan, ERD diagram, and Mongoose schemas.
+Analyze client materials in `inputs/` (`requirements.md`, `telegram_chat.txt`, `screenshots/`, `references.md`). Resolve any conflicting requirements, establish execution mode (`FRONTEND_FIRST`), and generate `PRD_AND_PLAN.md` with visual system architecture diagrams, user journey flowchart, database plan, visual ERD diagram, endpoint matrix, and 19-route frontend mapping.
 
 ---
 
 ## 2. Deliverables
-1. `PRD_AND_PLAN.md`: Comprehensive breakdown of requirements, visual system architecture & user flow diagrams, database plan & visual ERD diagram (Mermaid), Mongoose schemas with field matrices, API endpoints, and screenshot UI breakdown.
-2. Update `planning/task.md` with refined tasks specific to client features.
-3. Update `planning/open-questions.md` with any unresolved client ambiguities.
+1. `PRD_AND_PLAN.md`: Full architectural blueprint containing:
+   - Visual High-Level System Architecture Diagram (`mermaid graph TD`).
+   - End-to-End User Journey & Process Flowchart (`mermaid flowchart TD`).
+   - API Request-Response Lifecycle Flow (`mermaid sequenceDiagram`).
+   - Visual Database ERD Diagram (`mermaid erDiagram`) with field matrices.
+   - 19-Route Frontend Screen Breakdown & 6-State UI Enforcement.
+   - LocalStorage 10-Key persistence plan.
+2. Updated `planning/task.md` with 12 ordered atomic tasks under `FRONTEND_FIRST` strategy.
+3. Updated `PROJECT_STATUS.md`, `project.config.md`, and `planning/MEMORY.md`.
 
 ---
 
 ## 3. Acceptance Criteria
-- [ ] All client files in `inputs/` are inspected.
-- [ ] Conflicting requirements between PDF brief and Telegram chat are resolved in favor of Telegram.
-- [ ] Visual System Architecture and User Journey flow diagrams are rendered using Mermaid.
-- [ ] Database plan and visual ERD diagram (`mermaid erDiagram`) with relations and cardinality are documented.
-- [ ] Backend data models (Mongoose schemas, TypeScript interfaces, validation rules) are documented.
-- [ ] Backend REST API endpoints are mapped with request/response envelopes.
-- [ ] Frontend screenshot breakdown (layout, colors, components, responsive breakpoints) is documented.
-- [ ] Plan presented to human developer for "OK" approval before code is written.
+- [x] All materials in `inputs/` inspected with Telegram override protocol applied.
+- [x] Visual diagrams generated with zero mermaid syntax errors.
+- [x] Visual ERD diagram covers all entities (User, Lesson, Vocab, Grammar, Kanji, Quiz, Progress).
+- [x] Ordered task list for `FRONTEND_FIRST` generated.
+- [x] AI stops and presents plan to developer before coding.

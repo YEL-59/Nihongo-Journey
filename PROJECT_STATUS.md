@@ -1,11 +1,12 @@
-# 📊 Project Live Status & Module Checklist
+# 📊 Project Live Status & Module Checklist: Nihongo Journey (にほんご Journey)
 
-> **Overall Progress**: `[░░░░░░░░░░] 0% (0/6 Core Tasks Completed)`  
-> **Active Running Task**: `TASK-001: Client Intake & Architecture Blueprint`  
-> **Current Flow**: Ready to start intake and generate `PRD_AND_PLAN.md`  
-> **Last Verification**: Backend: `CLEAN (0 errors)` | Frontend: `CLEAN (0 errors)`  
+> **Overall Progress**: `[████░░░░░░] 33.3% (4/12 Tasks Completed)`  
+> **Active Running Task**: `TASK-005: Lesson Engine & Interactive Player (Minna no Nihongo N5)`  
+> **Current Flow**: Phase 2 Frontend-First In Progress -> Next: 12-Section Lesson Player  
+> **Execution Strategy**: `FRONTEND_FIRST` (Client Demo Priority -> Local Storage & UI -> Backend Mongoose & APIs)  
+> **Last Verification**: Backend: `CLEAN (0 errors)` | Frontend: `CLEAN (0 errors across 9 routes)`  
 > **Language Preference**: `EN` (English) *(Configurable via `npm run settings` or `settings.json`)*  
-> **Last Checkpoint**: `2026-11-10 17:00` (Local Time)  
+> **Last Checkpoint**: `2026-11-13 14:48` (Local Time)  
 
 ---
 
@@ -13,56 +14,36 @@
 *When you start tomorrow, resume after a break, or open a fresh AI chat window, copy and paste this line:*
 
 ```text
-Read PROJECT_STATUS.md and planning/MEMORY.md (Checkpoint: 2026-11-10 17:00) to restore session state and execute the next task [TASK-001: Client Intake].
+Read PROJECT_STATUS.md and planning/MEMORY.md (Checkpoint: 2026-11-13 14:48) to restore session state and execute the next task [TASK-005: Lesson Engine & Interactive Player (Minna no Nihongo N5)].
 ```
-
-*(বাংলায় চালাতে চাইলে: `PROJECT_STATUS.md এবং planning/MEMORY.md (চেকপয়েন্ট: 2026-11-10 17:00) দেখে সেশন স্টেট রিস্টোর করো এবং পরবর্তী টাস্কটি [TASK-001] এক্সিকিউট করো।`)*
 
 ---
 
 ## 📦 Module-by-Module Progress & Checklist
 
-### 🔹 Module 1: Intake, Planning & Architecture (`TASK-001`)
-- [ ] **Task 1.1**: Read client requirements (`inputs/client_docs/requirements.md` & `telegram_chat.txt`)
-- [ ] **Task 1.2**: Extract brand design tokens (colors, typography, border radius)
-- [ ] **Task 1.3**: Generate visual architecture & user flowcharts (`PRD_AND_PLAN.md`)
-- [ ] **Task 1.4**: Generate visual ERD diagram & database schema plan
+### 🔹 Phase 1: Intake & Architecture (`TASK-001`) - [COMPLETED]
+- [x] **Task 1.1**: Audit client requirements (`inputs/client_docs/requirements.md` & `telegram_chat.txt`)
+- [x] **Task 1.2**: Extract Japanese-inspired design tokens (Indigo, Purple, Emerald, Warm Off-White)
+- [x] **Task 1.3**: Generate visual architecture & user flowcharts (`PRD_AND_PLAN.md`)
+- [x] **Task 1.4**: Generate visual ERD diagram, data dictionary & endpoint specification matrix
+- [x] **Task 1.5**: Structure 12-task `FRONTEND_FIRST` board in `planning/tasks/`
 
-### 🔹 Module 2: Database & Mongoose Schemas (`TASK-002`)
-- [ ] **Task 2.1**: Define TypeScript interfaces & types
-- [ ] **Task 2.2**: Create Mongoose schemas with field-level validation
-- [ ] **Task 2.3**: Configure database connection & seed initial data
+### 🔹 Phase 2: Frontend-First Client Experience (`TASK-002` to `TASK-008`) - [⏳ ACTIVE]
+- [x] **TASK-002**: Design Tokens, Global Layout Shell, Collapsible Sidebar, Mobile Bottom Bar & Landing Page (`/`)
+- [x] **TASK-003**: Onboarding Flow (`/onboarding`), Visual Roadmap (`/roadmap`) & Learner Dashboard (`/dashboard`)
+- [x] **TASK-004**: Kana Mastery Center (`/hiragana` & `/katakana`) with stroke order, audio & quizzes
+- [ ] **TASK-005**: 12-Section Lesson Player (`/lessons/[id]`) & Learning Center (`/learn`) - [⏳ ACTIVE]
+- [ ] **TASK-006**: Vocabulary Library (`/vocabulary`), Kanji Lab (`/kanji`) & SRS Flashcards (`/flashcards`)
+- [ ] **TASK-007**: Grammar Library (`/grammar`), Reading Lab (`/reading`), Listening (`/listening`) & Speaking (`/speaking`)
+- [ ] **TASK-008**: JLPT N5 Exam Simulator (`/jlpt`), Study Planner (`/schedule`) & Progress Analytics (`/progress`)
 
-### 🔹 Module 3: Backend REST APIs & Middleware (`TASK-003`)
-- [ ] **Task 3.1**: Implement standardized `sendResponse` envelope & error middleware
-- [ ] **Task 3.2**: Build controllers & Express router endpoints
-- [ ] **Task 3.3**: Verify backend compilation: `npm run build --prefix backend` (0 errors)
+### 🔹 Phase 3: Backend Data & Synchronization (`TASK-009` to `TASK-011`)
+- [ ] **TASK-009**: Backend TypeScript Interfaces & Mongoose Schemas (Pre-Execution Gate Approved)
+- [ ] **TASK-010**: Express REST API Routes, Feature Controllers, and `sendResponse` Handlers
+- [ ] **TASK-011**: Frontend-Backend API Integration & Offline-First Cloud Synchronization Engine
 
-### 🔹 Module 4: Frontend Layout & Design System (`TASK-004`)
-- [ ] **Task 4.1**: Configure Tailwind CSS brand tokens & fonts
-- [ ] **Task 4.2**: Build screenshot-accurate responsive Navbar with mobile drawer (<640px)
-- [ ] **Task 4.3**: Build global Footer & page wrapper shell
-
-### 🔹 Module 5: Feature Pages, Components & 6-State UI (`TASK-005`)
-- [ ] **Task 5.1**: Build Hero banner & visual showcase sections
-- [ ] **Task 5.2**: Implement Card Grids & interactive widgets with realistic assets
-- [ ] **Task 5.3**: Enforce 6 UI states (Default, Skeleton, Empty, Error, Responsive, Hover)
-- [ ] **Task 5.4**: Connect Next.js frontend with backend API endpoints
-
-### 🔹 Module 6: Full Platform QA & Pre-Delivery Audit (`TASK-006`)
-- [ ] **Task 6.1**: Run full build verification (`npm run build`)
-- [ ] **Task 6.2**: Run automated validation suite (`scripts/validate-project.ps1`)
-- [ ] **Task 6.3**: Generate client delivery handover summary
-
----
-
-## 🔄 Module 7: Client Revisions & Modifications (Phase 5 Engine)
-*When client reviews the site and provides modifications in `inputs/client_docs/updates.md`:*
-
-- [ ] Read updates brief & compare with `planning/MEMORY.md` (Anti-Regression Gate)
-- [ ] Execute surgical modifications without breaking existing code
-- [ ] Verify `npm run build` on both frontend and backend
-- [ ] Update `PROJECT_STATUS.md` and `planning/MEMORY.md`
+### 🔹 Phase 4: Verification & Delivery (`TASK-012`)
+- [ ] **TASK-012**: Full E2E Build Audit (`npm run build` on both), 6-State UI Verification & Delivery Package
 
 ---
 
@@ -70,10 +51,14 @@ Read PROJECT_STATUS.md and planning/MEMORY.md (Checkpoint: 2026-11-10 17:00) to 
 
 | Task ID | Module | Title | Status | Verification |
 |---|---|---|---|---|
-| `TASK-001` | Planning | Client Intake & Architecture Blueprint | `READY` | Pending |
-| `TASK-002` | Backend | Backend Data Models & Mongoose Schemas | `BACKLOG` | Pending |
-| `TASK-003` | Backend | Backend API Routes, Controllers & Validation | `BACKLOG` | Pending |
-| `TASK-004` | Frontend | Frontend Design Tokens, Navbar & Layout | `BACKLOG` | Pending |
-| `TASK-005` | Full-Stack | Frontend Feature Views & API Integration | `BACKLOG` | Pending |
-| `TASK-006` | QA | Full Platform Verification & Build Audit | `BACKLOG` | Pending |
-
+| `TASK-001` | Planning | Client Intake & Architecture Blueprint | `DONE` | Clean (0 errors) |
+| `TASK-002` | Frontend | Design Tokens, Shell Layout, Navigation & Landing Page | `DONE` | Clean (0 errors) |
+| `TASK-003` | Frontend | Onboarding, Roadmap & Learner Dashboard Views | `DONE` | Clean (0 errors) |
+| `TASK-004` | Frontend | Kana Mastery Center (Hiragana & Katakana Practice) | `DONE` | Clean (0 errors) |
+| `TASK-005` | Frontend | Lesson Engine & Interactive Player (Minna no Nihongo N5) | `READY` | Pending || `TASK-006` | Frontend | Vocabulary Library, Kanji Lab & SRS Flashcards | `BACKLOG` | Pending |
+| `TASK-007` | Frontend | Grammar Library, Reading Lab, Listening & Speaking Labs | `BACKLOG` | Pending |
+| `TASK-008` | Frontend | JLPT N5 Exam Center, Study Planner & Progress Analytics | `BACKLOG` | Pending |
+| `TASK-009` | Backend | Backend Data Models & Mongoose Schemas (Gate Approved) | `BACKLOG` | Pending |
+| `TASK-010` | Backend | Backend REST APIs, Controllers & Validation | `BACKLOG` | Pending |
+| `TASK-011` | Full-Stack | Frontend-Backend Integration & Cloud Sync Engine | `BACKLOG` | Pending |
+| `TASK-012` | QA | Full Platform Verification, E2E Build Audit & Delivery | `BACKLOG` | Pending |
