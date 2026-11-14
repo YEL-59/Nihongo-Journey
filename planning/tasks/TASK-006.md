@@ -2,7 +2,7 @@
 
 - **Task ID**: `TASK-006`
 - **Domain**: Frontend (Next.js 14 / Flashcards & Study Labs)
-- **Status**: `BACKLOG`
+- **Status**: `DONE`
 - **Priority**: `P0`
 - **Assigned Role**: Frontend Developer
 - **Dependencies**: `TASK-003`
@@ -30,7 +30,7 @@ Build the Vocabulary Library (`/vocabulary`), the Kanji Study Lab (`/kanji`), an
 ---
 
 ## 3. Acceptance & Verification Criteria
-- [ ] Vocabulary search filters instantaneously with 0 lag.
-- [ ] Flashcard flips smoothly and schedules next review timestamp in `localStorage`.
-- [ ] Kanji cards show complete Onyomi, Kunyomi, and bilingual explanations.
-- [ ] `npm run build` in `frontend/` succeeds with 0 errors.
+- [x] Vocabulary search filters instantly on the client.
+- [x] Flashcards flip and schedule the next review timestamp in `localStorage`.
+- [x] Kanji cards show Onyomi, Kunyomi, radical details, and bilingual explanations.
+- [x] `npm run build` in `frontend/` succeeds with 0 errors.

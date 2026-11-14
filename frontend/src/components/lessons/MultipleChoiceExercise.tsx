@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MCQExercise } from '@/data/lessons';
+import { MCQExercise } from '@/content/shared/types';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 

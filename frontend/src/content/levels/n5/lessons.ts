@@ -1,93 +1,12 @@
-// Detailed lesson content data: vocabulary, conversations, exercises per lesson
-// Used by: /learn (index) and /lessons/[id] (12-section player)
-
-export interface VocabItem {
-  japanese: string;
-  reading: string;
-  romajiReading: string;
-  meaningEn: string;
-  meaningBn: string;
-  exampleJa: string;
-  exampleEn: string;
-  exampleBn: string;
-  partOfSpeech: string;
-}
-
-export interface DialogueLine {
-  speaker: string;
-  japanese: string;
-  furigana?: string; // ruby markup: "日本語|にほんご" pairs joined by |
-  romajiLine: string;
-  translationEn: string;
-  translationBn: string;
-}
-
-export interface ExerciseChoice {
-  id: string;
-  text: string;
-}
-
-export interface MCQExercise {
-  type: 'mcq';
-  id: string;
-  questionJa: string;
-  questionEn: string;
-  choices: ExerciseChoice[];
-  correctId: string;
-  explanationEn: string;
-  explanationBn: string;
-}
-
-export interface FillBlanksExercise {
-  type: 'fill';
-  id: string;
-  promptJa: string; // Use ___ for blank
-  promptEn: string;
-  answer: string;
-  hint: string;
-  explanationEn: string;
-  explanationBn: string;
-}
-
-export interface SentenceOrderExercise {
-  type: 'order';
-  id: string;
-  instructionEn: string;
-  instructionBn: string;
-  parts: string[]; // shuffled parts to rearrange
-  correctOrder: string[]; // correct sequence of parts
-  explanationEn: string;
-  explanationBn: string;
-}
-
-export type AnyExercise = MCQExercise | FillBlanksExercise | SentenceOrderExercise;
-
-export interface QuizQuestion {
-  id: string;
-  questionEn: string;
-  questionJa: string;
-  choices: ExerciseChoice[];
-  correctId: string;
-  explanationEn: string;
-  explanationBn: string;
-}
-
-export interface LessonDetail {
-  lessonId: number;
-  objectivesEn: string[];
-  objectivesBn: string[];
-  dialogue: DialogueLine[];
-  grammarNotesEn: string;
-  grammarNotesBn: string;
-  vocabulary: VocabItem[];
-  listeningTip: string;
-  speakingPromptEn: string;
-  speakingPromptBn: string;
-  exercises: AnyExercise[];
-  quizQuestions: QuizQuestion[];
-  culturalDeepDiveEn: string;
-  culturalDeepDiveBn: string;
-}
+import {
+  AnyExercise,
+  LessonDetail,
+  MCQExercise,
+  QuizQuestion,
+} from '@/content/shared/types';
+import { buildLesson } from './lessonBuilder';
+import { LESSONS_3_TO_14 } from './lessonsPart2';
+import { LESSONS_15_TO_25 } from './lessonsPart3';
 
 // --- Lesson 1: Self-Introductions & Identities ---
 const lesson1: LessonDetail = {
@@ -586,6 +505,9 @@ When Japanese people travel, it is an almost universal custom to bring back omiy
 export const LESSON_DETAILS: Record<number, LessonDetail> = {
   1: lesson1,
   2: lesson2,
+  ...Object.fromEntries(
+    [...LESSONS_3_TO_14, ...LESSONS_15_TO_25].map((lesson) => [lesson.id, buildLesson(lesson)]),
+  ),
 };
 
 // Helper to get lesson detail with fallback for lessons without full detail yet
