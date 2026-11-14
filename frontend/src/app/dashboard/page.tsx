@@ -24,7 +24,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { LESSONS_CURRICULUM } from '@/data/curriculum';
+import { LESSONS_CURRICULUM } from '@/content/levels/n5';
 
 export default function DashboardPage() {
   const { profile, progress, preferences, dailyActivity, updateProgress } = useApp();

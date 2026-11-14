@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Volume2, Lightbulb, AlertTriangle, ArrowRight } from 'lucide-react';
-import { SimilarKanaPair } from '@/data/kana';
+import { SimilarKanaPair } from '@/content/shared/kana';
 import { useApp } from '@/context/AppContext';
 
 interface KanaSimilarPairsProps {

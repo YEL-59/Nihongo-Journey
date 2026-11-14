@@ -14,6 +14,7 @@ import {
   getLocalStorageItem,
   setLocalStorageItem,
   LearningLanguageMode,
+  isAudioPlaybackSpeed,
 } from '@/lib/storage';
 
 interface AppContextType {
@@ -43,7 +44,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Load state from localStorage on client mount
   useEffect(() => {
     setIsMounted(true);
-    const loadedPrefs = getLocalStorageItem<UserPreferences>(STORAGE_KEYS.PREFERENCES, DEFAULT_PREFERENCES);
+    const storedPrefs = getLocalStorageItem<Partial<UserPreferences>>(STORAGE_KEYS.PREFERENCES, {});
+    const loadedPrefs: UserPreferences = {
+      ...DEFAULT_PREFERENCES,
+      ...storedPrefs,
+      audioSpeed: isAudioPlaybackSpeed(storedPrefs.audioSpeed) ? storedPrefs.audioSpeed : DEFAULT_PREFERENCES.audioSpeed,
+    };
     const loadedProfile = getLocalStorageItem<UserProfile>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
     const loadedProgress = getLocalStorageItem<LearningProgress>(STORAGE_KEYS.PROGRESS, DEFAULT_PROGRESS);
     const loadedActivity = getLocalStorageItem<DailyActivity>(STORAGE_KEYS.DAILY_ACTIVITY, DEFAULT_DAILY_ACTIVITY);
@@ -111,12 +117,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       window.speechSynthesis.cancel(); // Stop current speech
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ja-JP';
-      utterance.rate = 0.9; // Slightly slower for language learners
+      utterance.rate = preferences.audioSpeed;
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn('SpeechSynthesis error:', e);
     }
-  }, []);
+  }, [preferences.audioSpeed]);
 
   return (
     <AppContext.Provider

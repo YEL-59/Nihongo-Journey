@@ -13,7 +13,7 @@ import {
   ChevronRight,
   AlertTriangle,
 } from 'lucide-react';
-import { KanaCharacter } from '@/data/kana';
+import { KanaCharacter } from '@/content/shared/kana';
 import { WritingCanvas } from './WritingCanvas';
 import { useApp } from '@/context/AppContext';
 

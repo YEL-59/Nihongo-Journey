@@ -13,7 +13,7 @@ import {
   Sparkles,
   Headphones,
 } from 'lucide-react';
-import { KanaCharacter, KanaType } from '@/data/kana';
+import { KanaCharacter, KanaType } from '@/content/shared/kana';
 import { useApp } from '@/context/AppContext';
 import { STORAGE_KEYS, getLocalStorageItem, setLocalStorageItem, KanaMasteryData, DEFAULT_KANA_MASTERY } from '@/lib/storage';
 

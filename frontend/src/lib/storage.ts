@@ -14,11 +14,17 @@ export const STORAGE_KEYS = {
 } as const;
 
 export type LearningLanguageMode = 'all' | 'bn' | 'en';
+export type AudioPlaybackSpeed = 0.75 | 1 | 1.25;
+
+export function isAudioPlaybackSpeed(value: unknown): value is AudioPlaybackSpeed {
+  return value === 0.75 || value === 1 || value === 1.25;
+}
 
 export interface UserPreferences {
   languageMode: LearningLanguageMode;
   showRomaji: boolean;
   autoPlayAudio: boolean;
+  audioSpeed: AudioPlaybackSpeed;
   theme: 'light' | 'dark' | 'system';
   dailyTargetMinutes: number;
   sidebarCollapsed: boolean;
@@ -49,6 +55,21 @@ export interface LearningProgress {
   streakDays: number;
 }
 
+export type VocabularyReviewRating = 'again' | 'hard' | 'good' | 'easy';
+
+export interface VocabularyReviewRecord {
+  wordId: string;
+  dueAt: string;
+  intervalDays: number;
+  repetitions: number;
+  easeFactor: number;
+  lapses: number;
+  lastRating: VocabularyReviewRating;
+  lastReviewedAt: string;
+}
+
+export type VocabularyReviewStore = Record<string, VocabularyReviewRecord>;
+
 export interface KanaMasteryData {
   mastered: string[]; // List of character IDs e.g. 'h-a', 'k-ka'
   quizScores: Array<{
@@ -68,6 +89,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   languageMode: 'all',
   showRomaji: true,
   autoPlayAudio: true,
+  audioSpeed: 1,
   theme: 'light',
   dailyTargetMinutes: 30,
   sidebarCollapsed: false,
@@ -150,14 +172,58 @@ export function exportAllData(): string {
 // Import user data from JSON
 export function importAllData(jsonData: string): boolean {
   if (typeof window === 'undefined') return false;
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(jsonData);
-    Object.keys(parsed).forEach((key) => {
-      window.localStorage.setItem(key, JSON.stringify(parsed[key]));
-    });
-    return true;
+    parsed = JSON.parse(jsonData);
   } catch (err) {
-    console.error('Failed to import user data:', err);
+    console.error('Failed to parse the user-data backup:', err);
+    return false;
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    console.error('The user-data backup must be a JSON object.');
+    return false;
+  }
+
+  const entries = Object.entries(parsed as Record<string, unknown>);
+  const knownKeys = new Set<string>(Object.values(STORAGE_KEYS));
+  if (entries.some(([key]) => !knownKeys.has(key))) {
+    console.error('The user-data backup contains unsupported storage keys.');
+    return false;
+  }
+
+  const serializedEntries: Array<[string, string]> = [];
+  for (const [key, value] of entries) {
+    const serialized = JSON.stringify(value);
+    if (typeof serialized !== 'string') {
+      console.error(`The value for storage key "${key}" could not be serialized.`);
+      return false;
+    }
+    serializedEntries.push([key, serialized]);
+  }
+
+  const previousValues = new Map<string, string | null>();
+  try {
+    serializedEntries.forEach(([key]) => previousValues.set(key, window.localStorage.getItem(key)));
+  } catch (err) {
+    console.error('Failed to read current user data before import:', err);
+    return false;
+  }
+
+  try {
+    serializedEntries.forEach(([key, value]) => window.localStorage.setItem(key, value));
+    return true;
+  } catch (writeError) {
+    const rollbackErrors: unknown[] = [];
+    previousValues.forEach((previousValue, key) => {
+      try {
+        if (previousValue === null) window.localStorage.removeItem(key);
+        else window.localStorage.setItem(key, previousValue);
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
+    });
+    console.error('Failed to import user data; rollback was attempted.', { writeError, rollbackErrors });
     return false;
   }
 }
