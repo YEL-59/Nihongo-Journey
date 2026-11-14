@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search, Volume2, CheckCircle2, SlidersHorizontal, Sparkles } from 'lucide-react';
-import { KanaCharacter, KanaCategory, KanaType } from '@/data/kana';
+import { KanaCharacter, KanaCategory, KanaType } from '@/content/shared/kana';
 import { useApp } from '@/context/AppContext';
 
 interface KanaGridProps {

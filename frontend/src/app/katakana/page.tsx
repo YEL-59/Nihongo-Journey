@@ -16,7 +16,7 @@ import {
   SIMILAR_KATAKANA_PAIRS,
   getAllKatakana,
   KanaCharacter,
-} from '@/data/kana';
+} from '@/content/shared/kana';
 import { KanaGrid } from '@/components/kana/KanaGrid';
 import { KanaDetailModal } from '@/components/kana/KanaDetailModal';
 import { WritingCanvas } from '@/components/kana/WritingCanvas';
