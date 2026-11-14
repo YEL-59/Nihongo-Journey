@@ -18,7 +18,8 @@ import {
   Compass,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { LESSONS_CURRICULUM, CURRICULUM_PHASES, LessonCurriculumItem } from '@/data/curriculum';
+import { LESSONS_CURRICULUM, CURRICULUM_PHASES } from '@/content/levels/n5';
+import { LessonCurriculumItem } from '@/content/shared/types';
 
 export default function RoadmapPage() {
   const { progress, preferences } = useApp();

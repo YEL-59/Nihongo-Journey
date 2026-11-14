@@ -1,24 +1,6 @@
-export interface LessonCurriculumItem {
-  id: number;
-  lessonNumber: number;
-  level: 'N5' | 'N4' | 'N3';
-  phase: number;
-  phaseTitleEn: string;
-  phaseTitleBn: string;
-  titleJa: string;
-  titleEn: string;
-  titleBn: string;
-  grammarPatterns: string[];
-  grammarExplanationEn: string;
-  grammarExplanationBn: string;
-  vocabularyCount: number;
-  kanjiCount: number;
-  estimatedMinutes: number;
-  culturalNoteEn: string;
-  culturalNoteBn: string;
-}
+import { CurriculumPhase, LessonCurriculumItem } from '@/content/shared/types';
 
-export const CURRICULUM_PHASES = [
+export const CURRICULUM_PHASES: CurriculumPhase[] = [
   {
     phase: 1,
     titleEn: 'Phase 1: Basic Communication & Sentences',

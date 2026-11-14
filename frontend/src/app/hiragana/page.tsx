@@ -21,7 +21,7 @@ import {
   SIMILAR_HIRAGANA_PAIRS,
   getAllHiragana,
   KanaCharacter,
-} from '@/data/kana';
+} from '@/content/shared/kana';
 import { KanaGrid } from '@/components/kana/KanaGrid';
 import { KanaDetailModal } from '@/components/kana/KanaDetailModal';
 import { WritingCanvas } from '@/components/kana/WritingCanvas';
