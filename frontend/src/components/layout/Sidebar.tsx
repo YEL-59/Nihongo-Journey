@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Flame,
   User,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
@@ -85,6 +86,7 @@ const navSections: NavSection[] = [
     title: 'Exam & Analytics',
     jpTitle: '試験と計画',
     items: [
+      { name: 'Quiz Center', jpName: 'クイズ', href: '/quiz', icon: ClipboardCheck },
       { name: 'JLPT N5 Simulator', jpName: '模擬試験', href: '/jlpt', icon: Award, badge: 'Mock' },
       { name: 'Study Planner', jpName: '学習計画', href: '/schedule', icon: Calendar },
       { name: 'Progress Analytics', jpName: '進捗分析', href: '/progress', icon: BarChart3 },
