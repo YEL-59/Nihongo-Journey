@@ -23,4 +23,5 @@
 
 ## Security follow-up (2026-11-15)
 - The starter template's `init`, `backend/init`, `frontend/init` and the original `frontend/postcss.config.mjs` (commit `a0c313d`) contained a hidden obfuscated script that ran on every `npm run dev/build/start`. The working tree is clean and the `node init` script prefixes are removed, but the files are still in git history and on the GitHub remote.
+- 2026-11-15 (push): the remote branch tip `52d71e1` was a rewritten copy of local commit `d08ff6e` (same author, message and time, but committer timezone `-0800` instead of `+0600`, and absent from the local reflog) that changed the hidden payload in the init files and `frontend/postcss.config.mjs`. Something other than the developer's normal git workflow pushed to GitHub with the developer's credentials. It was merged with `-s ours` so the pushed tree is clean; the payload is still in history.
 - Developer decisions needed: (1) rotate credentials that were reachable from this machine; (2) whether to rewrite git history / force-push to remove the infected commit content; (3) do not reuse the EasyTemplate source for other projects until it is inspected.
