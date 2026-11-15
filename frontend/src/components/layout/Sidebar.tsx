@@ -28,6 +28,7 @@ import {
   ClipboardCheck,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { getLevelContent } from '@/content/shared/levelContent';
 
 interface NavItem {
   name: string;
@@ -138,6 +139,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, isMobileDrawer = 
             )}
             {section.items.map((item) => {
               const Icon = item.icon;
+              const lessonCount = getLevelContent(profile.currentLevel).curriculum.length;
+              const badge =
+                item.href === '/roadmap'
+                  ? profile.currentLevel
+                  : item.href === '/lessons/1'
+                    ? `1-${lessonCount}`
+                    : item.badge;
+              const displayName =
+                item.href === '/jlpt' ? `JLPT ${profile.currentLevel} Simulator` : item.name;
               const isActive =
                 item.href === '/'
                   ? pathname === '/'
@@ -148,7 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, isMobileDrawer = 
                   key={item.href}
                   href={item.href}
                   onClick={onItemClick}
-                  title={isCollapsed ? `${item.name} (${item.jpName})` : undefined}
+                  title={isCollapsed ? `${displayName} (${item.jpName})` : undefined}
                   className={`group relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? 'bg-brand-600 text-white shadow-sm shadow-brand-500/20 font-semibold'
@@ -164,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, isMobileDrawer = 
                   {!isCollapsed && (
                     <div className="flex-1 min-w-0 flex items-center justify-between">
                       <div className="truncate">
-                        <span className="block truncate">{item.name}</span>
+                        <span className="block truncate">{displayName}</span>
                         <span
                           className={`block text-[10px] font-jp truncate leading-tight ${
                             isActive ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'
@@ -173,7 +183,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, isMobileDrawer = 
                           {item.jpName}
                         </span>
                       </div>
-                      {item.badge && (
+                      {badge && (
                         <span
                           className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                             item.badgeColor ||
@@ -182,7 +192,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, isMobileDrawer = 
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400')
                           }`}
                         >
-                          {item.badge}
+                          {badge}
                         </span>
                       )}
                     </div>

@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Activity, Award, BookOpen, CalendarDays, Clock3, Layers } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { N5_KANJI, N5_VOCABULARY } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 import { isVocabularyMastered, normalizeVocabularyReviewStore } from '@/lib/study';
-import { STORAGE_KEYS } from '@/lib/storage';
+import { STORAGE_KEYS, getAttemptLevel } from '@/lib/storage';
 
 interface ProgressSnapshot {
   history: Record<string, number>;
@@ -68,7 +68,9 @@ function minutesColor(minutes: number): string {
 }
 
 export default function ProgressPage() {
-  const { isMounted, preferences } = useApp();
+  const { isMounted, preferences, profile, getLevelProgress } = useApp();
+  const level = profile.currentLevel;
+  const { curriculum, vocabulary, kanji } = getLevelContent(level);
   const [snapshot, setSnapshot] = useState<ProgressSnapshot>(EMPTY_SNAPSHOT);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState('');
@@ -108,7 +110,8 @@ export default function ProgressPage() {
       )) {
         throw new Error('Saved completed lesson list is invalid.');
       }
-      const completedLessons = Array.isArray(progress.completedLessons) ? new Set(progress.completedLessons).size : 0;
+      const levelProgress = getLevelProgress(level);
+      const completedLessons = new Set(levelProgress.completedLessons).size;
       const masteredKanjiIds = Array.isArray(rawKanji)
         ? new Set(rawKanji.filter((item): item is string => typeof item === 'string'))
         : new Set<string>();
@@ -116,7 +119,9 @@ export default function ProgressPage() {
       if (isRecord(rawReviews) && Object.keys(reviews).length !== Object.keys(rawReviews).length) {
         throw new Error('Saved vocabulary review history contains invalid entries.');
       }
-      const allAttempts = Array.isArray(rawExams) ? rawExams.filter(isRecord) : [];
+      const allAttempts = Array.isArray(rawExams)
+        ? rawExams.filter(isRecord).filter((attempt) => getAttemptLevel(attempt) === level)
+        : [];
       const quizAttempts = allAttempts.filter((attempt) => attempt.kind === 'quiz').length;
       const examAttempts = allAttempts.length - quizAttempts;
 
@@ -126,8 +131,8 @@ export default function ProgressPage() {
           ? Math.max(0, Math.floor(activity.currentStreak))
           : 0,
         completedLessons,
-        masteredVocabulary: N5_VOCABULARY.filter((entry) => reviews[entry.id] && isVocabularyMastered(reviews[entry.id])).length,
-        masteredKanji: N5_KANJI.filter((entry) => masteredKanjiIds.has(entry.character)).length,
+        masteredVocabulary: vocabulary.filter((entry) => reviews[entry.id] && isVocabularyMastered(reviews[entry.id])).length,
+        masteredKanji: kanji.filter((entry) => masteredKanjiIds.has(entry.character)).length,
         examAttempts,
         quizAttempts,
       });
@@ -137,7 +142,7 @@ export default function ProgressPage() {
     } finally {
       setIsLoaded(true);
     }
-  }, [isMounted]);
+  }, [isMounted, level, vocabulary, kanji, getLevelProgress]);
 
   const week = useMemo(() => buildRecentDays(snapshot.history, 7), [snapshot.history]);
   const month = useMemo(() => buildRecentDays(snapshot.history, 28), [snapshot.history]);
@@ -147,7 +152,7 @@ export default function ProgressPage() {
     const y = 124 - (day.minutes / maxMinutes) * 92;
     return `${x},${y}`;
   }).join(' ');
-  const totalVocabulary = N5_VOCABULARY.length;
+  const totalVocabulary = vocabulary.length;
   const vocabularyPercent = totalVocabulary
     ? Math.min(100, Math.round((snapshot.masteredVocabulary / totalVocabulary) * 100))
     : 0;
@@ -180,7 +185,7 @@ export default function ProgressPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Current streak', value: `${snapshot.streak} days`, icon: CalendarDays },
-          { label: 'Lessons completed', value: `${snapshot.completedLessons} / 25`, icon: BookOpen },
+          { label: 'Lessons completed', value: `${snapshot.completedLessons} / ${curriculum.length}`, icon: BookOpen },
           { label: 'Vocabulary mastered', value: `${snapshot.masteredVocabulary} / ${totalVocabulary}`, icon: Layers },
           { label: 'Exams / quizzes', value: `${snapshot.examAttempts} / ${snapshot.quizAttempts}`, icon: Award },
         ].map((metric) => {
@@ -200,7 +205,7 @@ export default function ProgressPage() {
         <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center dark:border-slate-700 dark:bg-slate-900">
           <Clock3 className="mx-auto h-8 w-8 text-slate-400" />
           <h2 className="mt-3 font-bold text-slate-800 dark:text-slate-100">No saved study activity yet</h2>
-          <p className="mt-1 text-sm text-slate-500">Complete a lesson, review vocabulary, or take the N5 practice exam to start your charts.</p>
+          <p className="mt-1 text-sm text-slate-500">Complete a lesson, review vocabulary, or take the {level} practice exam to start your charts.</p>
           <Link href="/learn" className="mt-4 inline-flex min-h-10 items-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500">Go to lessons</Link>
         </section>
       )}
@@ -241,12 +246,12 @@ export default function ProgressPage() {
         </article>
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white">N5 vocabulary mastery</h2>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white">{level} vocabulary mastery</h2>
           <p className="mt-1 text-xs text-slate-500">Based on saved spaced-repetition reviews</p>
           <div className="mt-5 flex items-center gap-4">
             <div
               role="img"
-              aria-label={`${vocabularyPercent}% of N5 vocabulary mastered`}
+              aria-label={`${vocabularyPercent}% of ${level} vocabulary mastered`}
               className="grid h-28 w-28 shrink-0 place-items-center rounded-full"
               style={{ background: `conic-gradient(#4f46e5 ${vocabularyPercent}%, #e2e8f0 ${vocabularyPercent}% 100%)` }}
             >
@@ -261,7 +266,7 @@ export default function ProgressPage() {
             </div>
           </div>
           <p className="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-500 dark:border-slate-800">
-            {snapshot.masteredKanji} of {N5_KANJI.length} N5 kanji marked mastered.
+            {snapshot.masteredKanji} of {kanji.length} {level} kanji marked mastered.
           </p>
         </article>
       </section>

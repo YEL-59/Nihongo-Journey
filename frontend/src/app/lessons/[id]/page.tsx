@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowRight, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Headphones, Languages, Mic, PlayCircle, Sparkles, Target } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import MultipleChoiceExercise from '@/components/lessons/MultipleChoiceExercise';
 import FillBlanksExercise from '@/components/lessons/FillBlanksExercise';
 import SentenceOrderExercise from '@/components/lessons/SentenceOrderExercise';
 import { useApp } from '@/context/AppContext';
-import { getLessonDetail, LESSONS_CURRICULUM } from '@/content/levels/n5';
-import { FillBlanksExercise as FillBlanksType, LessonDetail, MCQExercise, SentenceOrderExercise as SentenceOrderType } from '@/content/shared/types';
+import { getLevelContent } from '@/content/shared/levelContent';
+import { FillBlanksExercise as FillBlanksType, LessonCurriculumItem, LessonDetail, MCQExercise, SentenceOrderExercise as SentenceOrderType } from '@/content/shared/types';
 import { cn } from '@/lib/utils';
 
 const sectionLabels = [
@@ -27,7 +27,7 @@ const sectionLabels = [
   'Completion',
 ];
 
-function createFallbackLessonDetail(lesson: (typeof LESSONS_CURRICULUM)[number]): LessonDetail {
+function createFallbackLessonDetail(lesson: LessonCurriculumItem): LessonDetail {
   return {
     lessonId: lesson.lessonNumber,
     objectivesEn: [lesson.grammarExplanationEn],
@@ -49,14 +49,19 @@ function createFallbackLessonDetail(lesson: (typeof LESSONS_CURRICULUM)[number])
 export default function LessonPlayerPage() {
   const params = useParams<{ id: string }>();
   const lessonId = Number(params?.id ?? 1) || 1;
-  const { preferences, progress, updateProgress, playSpeech } = useApp();
+  const { preferences, profile, getLevelProgress, updateLevelProgress, playSpeech } = useApp();
+  const level = profile.currentLevel;
+  const { curriculum, getLessonDetail } = getLevelContent(level);
+  const levelProgress = getLevelProgress(level);
   const [currentSection, setCurrentSection] = useState(0);
   const [showFurigana, setShowFurigana] = useState(false);
   const [exerciseResults, setExerciseResults] = useState<Record<string, boolean>>({});
+  const [quizSelections, setQuizSelections] = useState<Record<string, string>>({});
+  const [retryKey, setRetryKey] = useState(0);
   const [completed, setCompleted] = useState(false);
 
-  const lesson = LESSONS_CURRICULUM.find((item) => item.lessonNumber === lessonId) ?? LESSONS_CURRICULUM[0];
-  const detail = useMemo(() => getLessonDetail(lessonId) ?? createFallbackLessonDetail(lesson), [lesson, lessonId]);
+  const lesson = curriculum.find((item) => item.lessonNumber === lessonId) ?? curriculum[0];
+  const detail = useMemo(() => getLessonDetail(lesson.lessonNumber) ?? createFallbackLessonDetail(lesson), [getLessonDetail, lesson]);
 
   const challengeIds = useMemo(
     () => [
@@ -68,25 +73,33 @@ export default function LessonPlayerPage() {
 
   const correctCount = challengeIds.filter((id) => exerciseResults[id] === true).length;
   const score = challengeIds.length ? Math.round((correctCount / challengeIds.length) * 100) : 0;
-  const nextLessonNumber = lessonId < 25 ? lessonId + 1 : null;
+  const nextLessonNumber = lesson.lessonNumber < curriculum.length ? lesson.lessonNumber + 1 : null;
+
+  useEffect(() => {
+    setCurrentSection(0);
+    setExerciseResults({});
+    setQuizSelections({});
+    setRetryKey(0);
+  }, [lessonId, level]);
+
+  useEffect(() => {
+    setCompleted(Boolean(levelProgress.completedLessons?.includes(lesson.lessonNumber)));
+  }, [lesson.lessonNumber, levelProgress.completedLessons]);
 
   function handleExerciseResult(id: string, isCorrect: boolean) {
     setExerciseResults((previous) => ({ ...previous, [id]: isCorrect }));
   }
 
-  function handleCompleteLesson() {
-    const completedSet = new Set(progress.completedLessons ?? []);
-    completedSet.add(lessonId);
+  function handleQuizSelect(questionId: string, choiceId: string, correctId: string) {
+    setQuizSelections((previous) => ({ ...previous, [questionId]: choiceId }));
+    handleExerciseResult(questionId, choiceId === correctId);
+  }
 
-    updateProgress({
-      currentLessonId: nextLessonNumber ?? lessonId,
-      completedLessons: Array.from(completedSet),
-      completedSections: {
-        ...(progress.completedSections ?? {}),
-        [lessonId]: sectionLabels.map((_, index) => String(index + 1)),
-      },
-    });
-    setCompleted(true);
+  function handleRetryLesson() {
+    setExerciseResults({});
+    setQuizSelections({});
+    setRetryKey((previous) => previous + 1);
+    setCurrentSection(7);
   }
 
   const showEnglish = preferences.languageMode === 'en' || preferences.languageMode === 'all';
@@ -94,6 +107,26 @@ export default function LessonPlayerPage() {
   const mcqExercise = detail.exercises.find((exercise): exercise is MCQExercise => exercise.type === 'mcq');
   const fillExercise = detail.exercises.find((exercise): exercise is FillBlanksType => exercise.type === 'fill');
   const orderExercise = detail.exercises.find((exercise): exercise is SentenceOrderType => exercise.type === 'order');
+  const hasAllRequiredWork = Boolean(
+    mcqExercise && fillExercise && orderExercise && detail.quizQuestions.length > 0 && challengeIds.length > 0,
+  );
+  const canComplete = hasAllRequiredWork && score >= 70;
+
+  function handleCompleteLesson() {
+    if (!canComplete) return;
+    const completedSet = new Set(levelProgress.completedLessons ?? []);
+    completedSet.add(lesson.lessonNumber);
+
+    updateLevelProgress(level, {
+      currentLessonId: nextLessonNumber ?? lesson.lessonNumber,
+      completedLessons: Array.from(completedSet),
+      completedSections: {
+        ...(levelProgress.completedSections ?? {}),
+        [lesson.lessonNumber]: sectionLabels.map((_, index) => String(index + 1)),
+      },
+    });
+    setCompleted(true);
+  }
 
   const renderSection = () => {
     switch (currentSection) {
@@ -302,6 +335,7 @@ export default function LessonPlayerPage() {
       case 7:
         return mcqExercise ? (
           <MultipleChoiceExercise
+            key={`${mcqExercise.id}-${retryKey}`}
             exercise={mcqExercise}
             languageMode={preferences.languageMode}
             showRomaji={preferences.showRomaji}
@@ -313,6 +347,7 @@ export default function LessonPlayerPage() {
       case 8:
         return fillExercise ? (
           <FillBlanksExercise
+            key={`${fillExercise.id}-${retryKey}`}
             exercise={fillExercise}
             languageMode={preferences.languageMode}
             onAnswer={(correct) => handleExerciseResult(fillExercise.id, correct)}
@@ -323,6 +358,7 @@ export default function LessonPlayerPage() {
       case 9:
         return orderExercise ? (
           <SentenceOrderExercise
+            key={`${orderExercise.id}-${retryKey}`}
             exercise={orderExercise}
             languageMode={preferences.languageMode}
             onAnswer={(correct) => handleExerciseResult(orderExercise.id, correct)}
@@ -337,32 +373,59 @@ export default function LessonPlayerPage() {
             <h3 className="text-2xl font-black text-slate-900">Mini quiz</h3>
             <div className="space-y-4">
               {detail.quizQuestions.length ? (
-                detail.quizQuestions.map((question, index) => (
-                  <div key={question.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-                    <p className="text-sm font-semibold text-slate-500">Question {index + 1}</p>
-                    <p className="mt-2 text-lg font-medium text-slate-800">{question.questionEn}</p>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {question.choices.map((choice) => (
-                        <button
-                          key={choice.id}
-                          type="button"
-                          onClick={() => handleExerciseResult(question.id, choice.id === question.correctId)}
+                detail.quizQuestions.map((question, index) => {
+                  const chosenId = quizSelections[question.id];
+                  const isAnswered = Boolean(chosenId);
+                  const isRight = chosenId === question.correctId;
+                  return (
+                    <div key={question.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+                      <p className="text-sm font-semibold text-slate-500">Question {index + 1}</p>
+                      <p className="mt-2 text-lg font-medium text-slate-800">{question.questionEn}</p>
+                      {question.questionJa && (
+                        <p className="mt-1 font-jp text-base text-brand-700">{question.questionJa}</p>
+                      )}
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {question.choices.map((choice) => {
+                          const isSelected = chosenId === choice.id;
+                          const isCorrectChoice = choice.id === question.correctId;
+                          return (
+                            <button
+                              key={choice.id}
+                              type="button"
+                              onClick={() => handleQuizSelect(question.id, choice.id, question.correctId)}
+                              aria-pressed={isSelected}
+                              className={cn(
+                                'rounded-xl border px-3 py-2 text-left text-sm font-medium transition',
+                                !isAnswered && 'border-slate-200 bg-slate-50 text-slate-700 hover:border-brand-300 hover:bg-brand-50',
+                                isAnswered && isCorrectChoice && 'border-emerald-400 bg-emerald-50 text-emerald-800',
+                                isAnswered && isSelected && !isCorrectChoice && 'border-rose-400 bg-rose-50 text-rose-800',
+                                isAnswered && !isSelected && !isCorrectChoice && 'border-slate-200 bg-slate-50 text-slate-500 opacity-75',
+                              )}
+                            >
+                              {choice.text}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {isAnswered && (
+                        <div
+                          role="status"
                           className={cn(
-                            'rounded-xl border px-3 py-2 text-left text-sm font-medium transition',
-                            exerciseResults[question.id] === true && choice.id === question.correctId
-                              ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-brand-300 hover:bg-brand-50',
+                            'mt-3 rounded-xl border px-3 py-2 text-xs leading-relaxed',
+                            isRight ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800',
                           )}
                         >
-                          {choice.text}
-                        </button>
-                      ))}
+                          <p className="font-semibold">{isRight ? 'Correct!' : 'Not quite — try another option or review below.'}</p>
+                          {showEnglish && <p className="mt-1">{question.explanationEn}</p>}
+                          {showBangla && <p className="mt-1">{question.explanationBn}</p>}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
-                  Quiz content for this lesson is being prepared. Continue to the completion summary to lock in progress.
+                  Quiz content for this lesson is unavailable. Required exercises must be present before completing this lesson.
                 </div>
               )}
             </div>
@@ -377,7 +440,7 @@ export default function LessonPlayerPage() {
               <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Progress snapshot</div>
               <div className="mt-3 text-4xl font-black text-slate-900">{score}%</div>
               <p className="mt-2 text-sm text-slate-600">
-                {correctCount} of {challengeIds.length || 1} answers correct.
+                {correctCount} of {challengeIds.length} answers correct.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -390,19 +453,32 @@ export default function LessonPlayerPage() {
                 <p className="mt-2">{lesson.culturalNoteBn}</p>
               </div>
             </div>
-            {!completed && (
+            <div className="flex flex-wrap items-center gap-3">
+              {!completed && (
+                <button
+                  type="button"
+                  onClick={handleCompleteLesson}
+                  disabled={!canComplete}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition',
+                    canComplete ? 'bg-brand-600 text-white hover:bg-brand-700' : 'cursor-not-allowed bg-slate-200 text-slate-500',
+                  )}
+                >
+                  {!hasAllRequiredWork
+                    ? 'Required exercises unavailable'
+                    : score >= 70
+                      ? 'Complete lesson'
+                      : 'Need 70%+ to unlock completion'}
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleCompleteLesson}
-                disabled={challengeIds.length ? score < 70 : false}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition',
-                  challengeIds.length ? (score >= 70 ? 'bg-brand-600 text-white hover:bg-brand-700' : 'cursor-not-allowed bg-slate-200 text-slate-500') : 'bg-brand-600 text-white hover:bg-brand-700',
-                )}
+                onClick={handleRetryLesson}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:bg-brand-50"
               >
-                {challengeIds.length ? (score >= 70 ? 'Complete lesson' : 'Need 70%+ to unlock completion') : 'Complete lesson'}
+                Retry exercises
               </button>
-            )}
+            </div>
             {completed && (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
                 Lesson marked complete and saved to your study progress.
@@ -434,7 +510,7 @@ export default function LessonPlayerPage() {
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft sm:p-6">
         <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Minna no Nihongo N5</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">JLPT {level} · Lesson {lesson.lessonNumber}</p>
             <h1 className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl">{lesson.titleEn}</h1>
             <p className="mt-1 text-sm text-slate-500">{lesson.titleBn}</p>
           </div>

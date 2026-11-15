@@ -10,8 +10,8 @@
 ## 1. Project Information & Metadata
 
 - **Project Name**: Nihongo Journey (にほんご Journey)
-- **Project Domain**: Personal Japanese Language Learning Web Application (Beginner to JLPT N5)
-- **Status**: `INTAKE_AND_PLAN_COMPLETE` (Awaiting Developer Approval Gate)
+- **Project Domain**: Personal Japanese Language Learning Web Application (JLPT N5–N1; N5 currently in progress)
+- **Status**: `FRONTEND_FIRST_N5_TO_N1_ACTIVE` (`TASK-013`; backend deferred until the frontend release gate)
 - **Language Preference**: `EN` (English)
 - **Client Brief Source**: `inputs/client_docs/requirements.md` & `inputs/client_docs/telegram_chat.txt`
 - **Client Modifications / Updates**: `inputs/client_docs/updates.md`

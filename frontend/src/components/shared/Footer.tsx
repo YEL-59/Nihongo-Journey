@@ -18,10 +18,10 @@ export const Footer: React.FC = () => {
               </span>
             </Link>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Complete Japanese learning companion from absolute beginner to JLPT N5 mastery. Featuring trilingual explanations in Bangla, English & Japanese.
+              A step-by-step JLPT N5–N1 learning journey, with all five levels available and explanations in Bangla, English & Japanese.
             </p>
             <div className="text-[11px] font-jp text-slate-400 dark:text-slate-500">
-              にほんご Journey • 初心者からN5合格へ
+              にほんご Journey • JLPT N5からN1へ
             </div>
           </div>
 
@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-              Curriculum (N5)
+              Curriculum (N5–N1)
             </h3>
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
               <li>
@@ -44,12 +44,12 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link href="/learn" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Minna no Nihongo (Lessons 1–25)
+                  Lessons for Every Level
                 </Link>
               </li>
               <li>
                 <Link href="/vocabulary" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  700+ Core N5 Vocabulary
+                  Vocabulary Library by Level
                 </Link>
               </li>
               <li>
@@ -74,12 +74,12 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link href="/kanji" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Kanji Lab (103 N5 Characters)
+                  Kanji Lab by Level
                 </Link>
               </li>
               <li>
                 <Link href="/listening" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  Native Audio Listening Lab
+                  Japanese Speech Listening Lab
                 </Link>
               </li>
               <li>
@@ -104,7 +104,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
               <li>
                 <Link href="/jlpt" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                  JLPT N5 Practice Examinations
+                  JLPT N5–N1 Practice Sets
                 </Link>
               </li>
               <li>

@@ -24,10 +24,15 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { LESSONS_CURRICULUM } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
+import { STORAGE_KEYS, getLocalStorageItem } from '@/lib/storage';
+import { isVocabularyMastered, normalizeVocabularyReviewStore } from '@/lib/study';
 
 export default function DashboardPage() {
-  const { profile, progress, preferences, dailyActivity, updateProgress } = useApp();
+  const { profile, preferences, dailyActivity, isMounted, getLevelProgress } = useApp();
+  const level = profile.currentLevel;
+  const { curriculum, vocabulary, kanji } = getLevelContent(level);
+  const levelProgress = getLevelProgress(level);
 
   // Dynamic Time-based Greeting
   const [greeting, setGreeting] = useState<{ ja: string; ro: string; en: string }>({
@@ -42,7 +47,7 @@ export default function DashboardPage() {
   >([
     { id: 'kana', label: 'Practice 10 Kana characters', jp: '仮名の練習', completed: false, link: '/hiragana' },
     { id: 'srs', label: 'Review 15 Spaced Repetition Flashcards', jp: '単語帳の復習', completed: false, link: '/flashcards' },
-    { id: 'lesson', label: 'Study current lesson grammar points', jp: '文法の学習', completed: false, link: `/lessons/${progress.currentLessonId || 1}` },
+    { id: 'lesson', label: 'Study current lesson grammar points', jp: '文法の学習', completed: false, link: `/lessons/${levelProgress.currentLessonId || 1}` },
     { id: 'listen', label: 'Complete 10-minute native listening activity', jp: 'リスニング練習', completed: false, link: '/listening' },
     { id: 'speak', label: 'Record 3 Japanese practice sentences', jp: 'スピーキング録音', completed: false, link: '/speaking' },
   ]);
@@ -66,16 +71,50 @@ export default function DashboardPage() {
 
   const completedChecklistCount = checklist.filter((c) => c.completed).length;
 
-  const currentLessonId = progress.currentLessonId || 1;
+  const currentLessonId = levelProgress.currentLessonId || 1;
   const currentLesson =
-    LESSONS_CURRICULUM.find((l) => l.lessonNumber === currentLessonId) || LESSONS_CURRICULUM[0];
+    curriculum.find((l) => l.lessonNumber === currentLessonId) || curriculum[0];
 
-  const totalLessons = LESSONS_CURRICULUM.length;
-  const completedLessonsCount = progress.completedLessons?.length || 0;
+  const totalLessons = curriculum.length;
+  const completedLessonsCount = levelProgress.completedLessons?.length || 0;
   const percentComplete = Math.round((completedLessonsCount / totalLessons) * 100);
 
-  // Generate 7-day activity mock bars from actual activity history
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Mastery counts and the 7-day chart come from saved study data for the current level.
+  const [masteredVocabulary, setMasteredVocabulary] = useState(0);
+  const [masteredKanji, setMasteredKanji] = useState(0);
+  const [week, setWeek] = useState<Array<{ key: string; label: string; minutes: number }>>([]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    const reviews = normalizeVocabularyReviewStore(getLocalStorageItem<unknown>(STORAGE_KEYS.VOCAB_REVIEWS, {}));
+    setMasteredVocabulary(
+      vocabulary.filter((entry) => reviews[entry.id] && isVocabularyMastered(reviews[entry.id])).length,
+    );
+
+    const storedKanji = getLocalStorageItem<unknown>(STORAGE_KEYS.KANJI_PROGRESS, []);
+    const masteredCharacters = new Set(Array.isArray(storedKanji) ? storedKanji : []);
+    setMasteredKanji(kanji.filter((entry) => masteredCharacters.has(entry.character)).length);
+
+    const activity = getLocalStorageItem<{ history?: unknown } | null>(STORAGE_KEYS.DAILY_ACTIVITY, null);
+    const history =
+      activity && typeof activity.history === 'object' && activity.history !== null
+        ? (activity.history as Record<string, unknown>)
+        : {};
+    const today = new Date();
+    setWeek(
+      Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (6 - index));
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const minutes = history[key];
+        return {
+          key,
+          label: date.toLocaleDateString('en', { weekday: 'short' }),
+          minutes: typeof minutes === 'number' && Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes) : 0,
+        };
+      }),
+    );
+  }, [isMounted, vocabulary, kanji]);
+
   const dailyTarget = preferences.dailyTargetMinutes || 30;
 
   return (
@@ -93,8 +132,9 @@ export default function DashboardPage() {
             {greeting.en}, {profile.name}!
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-            Goal: <strong className="text-slate-700 dark:text-slate-300">{profile.studyGoal}</strong> • Target:{' '}
-            <strong className="text-brand-600 dark:text-brand-400">JLPT {profile.targetLevel}</strong>
+            Goal: <strong className="text-slate-700 dark:text-slate-300">{profile.studyGoal}</strong> • Studying:{' '}
+            <strong className="text-brand-600 dark:text-brand-400">JLPT {profile.currentLevel}</strong> • Target:{' '}
+            <strong className="text-torii-600 dark:text-torii-400">JLPT {profile.targetLevel}</strong>
           </p>
         </div>
 
@@ -113,8 +153,8 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-torii-50 dark:bg-torii-950/40 border border-torii-200 dark:border-torii-800 text-torii-700 dark:text-torii-300 shadow-sm">
             <Award className="w-5 h-5 text-torii-600" />
             <div>
-              <div className="text-xs font-bold leading-tight">Level {profile.targetLevel}</div>
-              <div className="text-[10px] text-torii-600/80">Beginner Track</div>
+              <div className="text-xs font-bold leading-tight">Studying {profile.currentLevel}</div>
+              <div className="text-[10px] text-torii-600/80">Goal: {profile.targetLevel}</div>
             </div>
           </div>
         </div>
@@ -129,12 +169,12 @@ export default function DashboardPage() {
             <BookOpen className="w-4 h-4 text-brand-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            {completedLessonsCount} <span className="text-sm font-normal text-slate-400">/ 25</span>
+            {completedLessonsCount} <span className="text-sm font-normal text-slate-400">/ {totalLessons}</span>
           </div>
           <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
             <div
               className="h-full bg-brand-600 rounded-full transition-all duration-300"
-              style={{ width: `${Math.max(percentComplete, 5)}%` }}
+              style={{ width: `${percentComplete}%` }}
             />
           </div>
         </div>
@@ -146,7 +186,7 @@ export default function DashboardPage() {
             <Languages className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            {progress.vocabularyMasteredCount || 12} <span className="text-sm font-normal text-slate-400">/ 700</span>
+            {masteredVocabulary} <span className="text-sm font-normal text-slate-400">/ {vocabulary.length}</span>
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
             Spaced Review Active
@@ -160,10 +200,10 @@ export default function DashboardPage() {
             <Compass className="w-4 h-4 text-sakura-500" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            {progress.kanjiMasteredCount || 5} <span className="text-sm font-normal text-slate-400">/ 103</span>
+            {masteredKanji} <span className="text-sm font-normal text-slate-400">/ {kanji.length}</span>
           </div>
           <div className="text-[11px] text-sakura-500 font-semibold font-jp">
-            漢字 (N5 Basics)
+            漢字 ({level})
           </div>
         </div>
 
@@ -333,12 +373,12 @@ export default function DashboardPage() {
           {/* Bar Chart Visualization */}
           <div className="pt-4 space-y-4">
             <div className="h-40 flex items-end justify-between gap-2 sm:gap-4 px-2">
-              {[25, 30, 45, 20, 35, 15, 30].map((minutes, idx) => {
+              {week.map(({ key, label, minutes }) => {
                 const heightPercent = Math.min(Math.round((minutes / 60) * 100), 100);
                 const isTargetMet = minutes >= dailyTarget;
 
                 return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
+                  <div key={key} className="flex-1 flex flex-col items-center gap-2 group">
                     <div className="text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
                       {minutes}m
                     </div>
@@ -353,7 +393,7 @@ export default function DashboardPage() {
                       />
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                      {daysOfWeek[idx]}
+                      {label}
                     </span>
                   </div>
                 );

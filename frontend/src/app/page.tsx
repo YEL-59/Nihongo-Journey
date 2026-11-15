@@ -25,11 +25,11 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { LearningLanguageMode } from '@/lib/storage';
+import { JLPT_LEVELS } from '@/content/shared/registry';
 
 export default function HomePage() {
   const { preferences, setLanguageMode, playSpeech } = useApp();
   const [activeSentenceTab, setActiveSentenceTab] = useState<LearningLanguageMode>('all');
-  const [activeRoadmapLevel, setActiveRoadmapLevel] = useState<'N5' | 'N4' | 'N3'>('N5');
   const [playingWord, setPlayingWord] = useState<string | null>(null);
 
   const sampleSentence = '初めまして、私は留学生です。よろしくお願いします。';
@@ -48,7 +48,7 @@ export default function HomePage() {
         {/* Torii-inspired Pill Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-sm animate-in fade-in zoom-in-95 duration-500">
           <span className="w-2 h-2 rounded-full bg-sakura-500 animate-pulse" />
-          <span>Complete Beginner to JLPT N5 Masterclass • বাংলা • English • 日本語</span>
+          <span>JLPT N5–N1 Learning Path • All Levels Open • বাংলা • English • 日本語</span>
         </div>
 
         {/* Hero Title */}
@@ -60,11 +60,12 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="font-bn text-xl sm:text-2xl text-slate-700 dark:text-slate-300 font-medium">
-            আত্মবিশ্বাসের সাথে সহজে জাপানি ভাষা শিখুন—শূন্য থেকে JLPT N5 পর্যন্ত।
+            আত্মবিশ্বাসের সাথে জাপানি শিখুন—JLPT N5 থেকে N1 পর্যন্ত ধাপে ধাপে; পাঁচটি লেভেলই এখন চালু।
           </p>
           <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            A comprehensive, textbook-aligned Japanese learning platform tailored for Bangladeshi and global learners.
-            Minna no Nihongo I lessons (1–25), Kana stroke animations, spaced repetition (SRS) flashcards, and native audio.
+            A step-by-step Japanese learning path for Bangladeshi and global learners. Start with N5 and
+            move up through N4, N3, N2, and N1 at your own pace. Includes original lessons, Kana
+            practice, spaced repetition (SRS) flashcards, and browser speech playback.
           </p>
         </div>
 
@@ -83,7 +84,7 @@ export default function HomePage() {
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-sm transition-all"
           >
             <BookOpen className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-            <span>Explore N5 Roadmap</span>
+            <span>Explore N5–N1 Roadmap</span>
           </Link>
           <Link
             href="/lessons/1"
@@ -268,7 +269,7 @@ export default function HomePage() {
             6 Specialized Modules for Japanese Mastery
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
-            Every feature is structured according to JLPT N5 guidelines and the proven Minna no Nihongo curriculum.
+            The N5 course follows beginner-level JLPT outcomes, and each higher level builds on the one before it.
           </p>
         </div>
 
@@ -426,7 +427,7 @@ export default function HomePage() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Full timed examination simulating Language Knowledge (Vocabulary/Grammar), Reading, and Listening sections with scoring.
+                An original 12-question timed practice set with answer explanations across vocabulary, grammar, reading, and listening.
               </p>
             </div>
             <div className="flex items-center text-xs font-semibold text-torii-600 dark:text-torii-400 gap-1 pt-2">
@@ -446,45 +447,26 @@ export default function HomePage() {
                 Structured Learning Curriculum
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-                Your 4-Phase Path to JLPT N5 Certification
+                Your Four-Phase N5 Course
               </h2>
             </div>
 
-            {/* Level Selector */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setActiveRoadmapLevel('N5')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  activeRoadmapLevel === 'N5'
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                JLPT N5 (Active)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveRoadmapLevel('N4')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  activeRoadmapLevel === 'N4'
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                JLPT N4 (Coming)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveRoadmapLevel('N3')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  activeRoadmapLevel === 'N3'
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                JLPT N3 (Planned)
-              </button>
+            <div aria-label="JLPT course availability" className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+              {JLPT_LEVELS.map(({ level, status }) => (
+                <div
+                  key={level}
+                  className={`rounded-lg px-2 py-1.5 text-[10px] font-semibold ${
+                    status === 'in-progress'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                  }`}
+                >
+                  <span className="block">JLPT {level}</span>
+                  <span className="block font-normal">
+                    {status === 'in-progress' ? 'In progress' : status}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -606,7 +588,7 @@ export default function HomePage() {
               আজই জাপানি ভাষা শেখা শুরু করুন—কোনো লগইন বা সাবস্ক্রিপশন ছাড়াই।
             </p>
             <p className="text-xs sm:text-sm text-white/80">
-              Instant access to Hiragana charts, Lessons 1–25, spaced repetition flashcards, and JLPT N5 practice.
+              Start with the N5 course today and continue through N4–N1 whenever you are ready.
             </p>
           </div>
 

@@ -265,3 +265,18 @@ export interface JLPTExamQuestion {
   readingText?: string;
   listeningText?: string;
 }
+
+export interface LevelContentPackage {
+  metadata: LevelMetadata;
+  phases: CurriculumPhase[];
+  curriculum: LessonCurriculumItem[];
+  getLessonDetail: (lessonId: number) => LessonDetail | null | undefined;
+  vocabulary: VocabularyEntry[];
+  kanji: KanjiEntry[];
+  grammar: GrammarPattern[];
+  readings: ReadingPassage[];
+  listening: ListeningConversation[];
+  speakingPrompts: SpeakingPrompt[];
+  examDurationSeconds: number;
+  examQuestions: JLPTExamQuestion[];
+}

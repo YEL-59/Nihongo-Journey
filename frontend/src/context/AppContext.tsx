@@ -6,6 +6,7 @@ import {
   UserPreferences,
   UserProfile,
   LearningProgress,
+  LevelProgressSnapshot,
   DailyActivity,
   DEFAULT_PREFERENCES,
   DEFAULT_PROFILE,
@@ -16,6 +17,8 @@ import {
   LearningLanguageMode,
   isAudioPlaybackSpeed,
 } from '@/lib/storage';
+import { JLPT_LEVELS, isLevelSelectable } from '@/content/shared/registry';
+import type { JLPTLevel } from '@/content/shared/types';
 
 interface AppContextType {
   preferences: UserPreferences;
@@ -26,6 +29,8 @@ interface AppContextType {
   updatePreferences: (updates: Partial<UserPreferences>) => void;
   updateProfile: (updates: Partial<UserProfile>) => void;
   updateProgress: (updates: Partial<LearningProgress>) => void;
+  getLevelProgress: (level?: JLPTLevel) => LevelProgressSnapshot;
+  updateLevelProgress: (level: JLPTLevel, updates: Partial<LevelProgressSnapshot>) => void;
   setLanguageMode: (mode: LearningLanguageMode) => void;
   toggleRomaji: () => void;
   toggleSidebar: () => void;
@@ -50,7 +55,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...storedPrefs,
       audioSpeed: isAudioPlaybackSpeed(storedPrefs.audioSpeed) ? storedPrefs.audioSpeed : DEFAULT_PREFERENCES.audioSpeed,
     };
-    const loadedProfile = getLocalStorageItem<UserProfile>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+    const storedProfileValue = getLocalStorageItem<Partial<UserProfile> | null>(STORAGE_KEYS.PROFILE, {});
+    const storedProfile = storedProfileValue
+      && typeof storedProfileValue === 'object'
+      && !Array.isArray(storedProfileValue)
+      ? storedProfileValue
+      : {};
+    if (storedProfileValue === null || storedProfile !== storedProfileValue) {
+      console.warn('Ignoring malformed stored user profile.');
+    }
+    const targetLevel = JLPT_LEVELS.find(({ level }) => level === storedProfile.targetLevel)?.level
+      ?? DEFAULT_PROFILE.targetLevel;
+    const storedCurrentLevel = JLPT_LEVELS.find(({ level }) => level === storedProfile.currentLevel)?.level;
+    const currentLevel = storedCurrentLevel && isLevelSelectable(storedCurrentLevel)
+      ? storedCurrentLevel
+      : DEFAULT_PROFILE.currentLevel;
+    const loadedProfile: UserProfile = {
+      ...DEFAULT_PROFILE,
+      ...storedProfile,
+      currentLevel,
+      targetLevel,
+    };
     const loadedProgress = getLocalStorageItem<LearningProgress>(STORAGE_KEYS.PROGRESS, DEFAULT_PROGRESS);
     const loadedActivity = getLocalStorageItem<DailyActivity>(STORAGE_KEYS.DAILY_ACTIVITY, DEFAULT_DAILY_ACTIVITY);
 
@@ -98,6 +123,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
+  const getLevelProgress = useCallback(
+    (level?: JLPTLevel): LevelProgressSnapshot => {
+      const target = level ?? profile.currentLevel;
+      const scoped = progress.levelProgress?.[target];
+      if (scoped) return scoped;
+      if (target === 'N5') {
+        return {
+          currentLessonId: progress.currentLessonId ?? 1,
+          completedLessons: progress.completedLessons ?? [],
+          completedSections: progress.completedSections ?? {},
+        };
+      }
+      return {
+        currentLessonId: 1,
+        completedLessons: [],
+        completedSections: {},
+      };
+    },
+    [profile.currentLevel, progress],
+  );
+
+  const updateLevelProgress = useCallback(
+    (level: JLPTLevel, updates: Partial<LevelProgressSnapshot>) => {
+      setProgress((prev) => {
+        const currentScoped: LevelProgressSnapshot =
+          prev.levelProgress?.[level] ??
+          (level === 'N5'
+            ? {
+                currentLessonId: prev.currentLessonId ?? 1,
+                completedLessons: prev.completedLessons ?? [],
+                completedSections: prev.completedSections ?? {},
+              }
+            : {
+                currentLessonId: 1,
+                completedLessons: [],
+                completedSections: {},
+              });
+        const nextScoped: LevelProgressSnapshot = { ...currentScoped, ...updates };
+        const next: LearningProgress = {
+          ...prev,
+          ...(level === 'N5' ? nextScoped : {}),
+          levelProgress: {
+            ...(prev.levelProgress ?? {}),
+            [level]: nextScoped,
+          },
+        };
+        setLocalStorageItem(STORAGE_KEYS.PROGRESS, next);
+        return next;
+      });
+    },
+    [],
+  );
+
   const setLanguageMode = useCallback((mode: LearningLanguageMode) => {
     updatePreferences({ languageMode: mode });
   }, [updatePreferences]);
@@ -135,6 +213,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updatePreferences,
         updateProfile,
         updateProgress,
+        getLevelProgress,
+        updateLevelProgress,
         setLanguageMode,
         toggleRomaji,
         toggleSidebar,

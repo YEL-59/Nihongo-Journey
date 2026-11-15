@@ -23,3 +23,25 @@ export const N5_GRAMMAR = [...BASE_GRAMMAR, ...N5_GRAMMAR_EXTENDED.filter((item)
   (a, b) => a.lesson - b.lesson,
 );
 export { N5_EXAM_DURATION_SECONDS, N5_EXAM_QUESTIONS } from './exam';
+
+import { N5_LEVEL } from './level';
+import { CURRICULUM_PHASES, LESSONS_CURRICULUM } from './curriculum';
+import { getLessonDetail } from './lessons';
+import { N5_LISTENING, N5_READINGS, N5_SPEAKING_PROMPTS } from './skills';
+import { N5_EXAM_DURATION_SECONDS, N5_EXAM_QUESTIONS } from './exam';
+import type { LevelContentPackage } from '@/content/shared/types';
+
+export const N5_PACKAGE: LevelContentPackage = {
+  metadata: N5_LEVEL,
+  phases: CURRICULUM_PHASES,
+  curriculum: LESSONS_CURRICULUM,
+  getLessonDetail,
+  vocabulary: N5_VOCABULARY,
+  kanji: N5_KANJI,
+  grammar: N5_GRAMMAR,
+  readings: N5_READINGS,
+  listening: N5_LISTENING,
+  speakingPrompts: N5_SPEAKING_PROMPTS,
+  examDurationSeconds: N5_EXAM_DURATION_SECONDS,
+  examQuestions: N5_EXAM_QUESTIONS,
+};

@@ -20,15 +20,18 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { LearningLanguageMode } from '@/lib/storage';
+import { JLPTLevel } from '@/content/shared/types';
+import { JLPT_LEVELS } from '@/content/shared/registry';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { preferences, updatePreferences, profile, updateProfile, updateProgress } = useApp();
+  const { preferences, updatePreferences, profile, updateProfile } = useApp();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedLanguage, setSelectedLanguage] = useState<LearningLanguageMode>(preferences.languageMode || 'all');
   const [selectedDailyMinutes, setSelectedDailyMinutes] = useState<number>(preferences.dailyTargetMinutes || 30);
-  const [selectedGoal, setSelectedGoal] = useState<string>(profile.studyGoal || 'Pass JLPT N5 & Study/Work in Japan');
+  const [selectedGoal, setSelectedGoal] = useState<string>(profile.studyGoal || 'Learn Japanese for travel, study, work, or JLPT');
+  const [selectedTargetLevel, setSelectedTargetLevel] = useState<JLPTLevel>(profile.targetLevel || 'N5');
   const [learnerName, setLearnerName] = useState<string>(profile.name === 'Learner' ? '' : profile.name);
   const [startingPoint, setStartingPoint] = useState<'kana' | 'lesson1' | 'review'>('kana');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -41,7 +44,7 @@ export default function OnboardingPage() {
       setStep(2);
     } else if (step === 2) {
       updatePreferences({ dailyTargetMinutes: selectedDailyMinutes });
-      updateProfile({ studyGoal: selectedGoal });
+      updateProfile({ studyGoal: selectedGoal, targetLevel: selectedTargetLevel });
       setStep(3);
     }
   };
@@ -63,17 +66,13 @@ export default function OnboardingPage() {
       name: finalName,
       hasCompletedOnboarding: true,
       studyGoal: selectedGoal,
-      targetLevel: 'N5',
+      currentLevel: profile.currentLevel,
+      targetLevel: selectedTargetLevel,
     });
 
     updatePreferences({
       languageMode: selectedLanguage,
       dailyTargetMinutes: selectedDailyMinutes,
-    });
-
-    // If starting with Kana, leave lesson at 1; if know kana, ensure lesson is set
-    updateProgress({
-      currentLessonId: 1,
     });
 
     setTimeout(() => {
@@ -286,7 +285,7 @@ export default function OnboardingPage() {
                   {[
                     { id: 'study_japan', title: 'Study in Japan (University/Language School)', icon: GraduationCap },
                     { id: 'work_japan', title: 'Work in Japan (SSW / TITP / IT Engineer)', icon: Briefcase },
-                    { id: 'jlpt_pass', title: 'Pass JLPT N5 Official Examination', icon: Award },
+                    { id: 'jlpt_pass', title: 'Pass a JLPT examination', icon: Award },
                     { id: 'hobby', title: 'Personal Interest, Anime & Japanese Culture', icon: Sparkles },
                   ].map((goalItem) => {
                     const Icon = goalItem.icon;
@@ -318,6 +317,33 @@ export default function OnboardingPage() {
                     );
                   })}
                 </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <label
+                  htmlFor="target-jlpt-level"
+                  className="block text-xs font-bold uppercase tracking-wider text-slate-500"
+                >
+                  Target JLPT level:
+                </label>
+                <select
+                  id="target-jlpt-level"
+                  value={selectedTargetLevel}
+                  onChange={(event) => {
+                    const selected = JLPT_LEVELS.find(({ level }) => level === event.target.value)?.level;
+                    if (selected) setSelectedTargetLevel(selected);
+                  }}
+                  className="w-full sm:w-56 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  {JLPT_LEVELS.map(({ level, status }) => (
+                    <option key={level} value={level}>
+                      {level} — {status === 'in-progress' ? 'Course in progress' : status}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Your target can be ahead of the current course. N4–N1 lessons will unlock as each level is completed.
+                </p>
               </div>
             </div>
           )}
@@ -440,7 +466,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-0.5">
                       <div className="font-bold text-sm text-slate-900 dark:text-white">
-                        Reviewing for JLPT N5 (Roadmap & Dashboard)
+                        Reviewing the active JLPT course (Roadmap & Dashboard)
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Explore full 25-lesson roadmap, Spaced Repetition flashcards, Kanji lab, and mock examinations.

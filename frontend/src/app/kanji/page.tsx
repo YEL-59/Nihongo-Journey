@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Search, Sparkles } from 'lucide-react';
 import KanjiDetailModal from '@/components/kanji/KanjiDetailModal';
 import { useApp } from '@/context/AppContext';
-import { N5_KANJI } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 import { KanjiEntry } from '@/content/shared/types';
 import { getLocalStorageItem, setLocalStorageItem, STORAGE_KEYS } from '@/lib/storage';
 
@@ -18,7 +18,8 @@ function matchesStrokeFilter(strokeCount: number, filter: StrokeFilter): boolean
 }
 
 export default function KanjiPage() {
-  const { isMounted, progress, updateProgress, preferences } = useApp();
+  const { isMounted, progress, updateProgress, preferences, profile } = useApp();
+  const levelKanji = getLevelContent(profile.currentLevel).kanji;
   const [query, setQuery] = useState('');
   const [strokeFilter, setStrokeFilter] = useState<StrokeFilter>('all');
   const [mastered, setMastered] = useState<string[]>([]);
@@ -35,7 +36,7 @@ export default function KanjiPage() {
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const showEnglish = preferences.languageMode === 'en' || preferences.languageMode === 'all';
   const showBangla = preferences.languageMode === 'bn' || preferences.languageMode === 'all';
-  const filteredKanji = useMemo(() => N5_KANJI.filter((entry) => {
+  const filteredKanji = useMemo(() => levelKanji.filter((entry) => {
     const searchable = [
       entry.character,
       ...entry.meaningsEn,
@@ -47,7 +48,7 @@ export default function KanjiPage() {
     ].join(' ').toLocaleLowerCase();
 
     return (!normalizedQuery || searchable.includes(normalizedQuery)) && matchesStrokeFilter(entry.strokeCount, strokeFilter);
-  }), [normalizedQuery, strokeFilter]);
+  }), [levelKanji, normalizedQuery, strokeFilter]);
 
   function toggleMastered(character: string) {
     const next = mastered.includes(character)
@@ -77,7 +78,7 @@ export default function KanjiPage() {
       <header className="rounded-3xl bg-gradient-to-br from-sakura-600 via-purple-700 to-brand-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <Sparkles className="h-4 w-4" />
-          Kanji Lab · JLPT N5
+          Kanji Lab · JLPT {profile.currentLevel}
         </div>
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -87,7 +88,7 @@ export default function KanjiPage() {
             </p>
           </div>
           <div className="rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold backdrop-blur">
-            {mastered.length} / {N5_KANJI.length} N5 kanji mastered
+            {levelKanji.filter((entry) => mastered.includes(entry.character)).length} / {levelKanji.length} {profile.currentLevel} kanji mastered
           </div>
         </div>
       </header>
@@ -118,11 +119,11 @@ export default function KanjiPage() {
             </select>
           </label>
         </div>
-        <p className="mt-3 text-xs text-slate-500">{filteredKanji.length} of {N5_KANJI.length} N5 kanji shown</p>
+        <p className="mt-3 text-xs text-slate-500">{filteredKanji.length} of {levelKanji.length} {profile.currentLevel} kanji shown</p>
       </section>
 
       {filteredKanji.length ? (
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-7" aria-label="N5 kanji cards">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-7" aria-label={`${profile.currentLevel} kanji cards`}>
           {filteredKanji.map((entry) => {
             const isMastered = mastered.includes(entry.character);
             return (

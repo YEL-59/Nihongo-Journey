@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bookmark, CheckCircle2, Clock3, RotateCcw, Volume2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { N5_VOCABULARY } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -27,7 +27,8 @@ const ratings: Array<{ value: VocabularyReviewRating; label: string; tone: strin
 ];
 
 export default function FlashcardsPage() {
-  const { isMounted, preferences, progress, updateProgress, playSpeech } = useApp();
+  const { isMounted, preferences, progress, updateProgress, profile, playSpeech } = useApp();
+  const levelVocabulary = getLevelContent(profile.currentLevel).vocabulary;
   const [reviews, setReviews] = useState<VocabularyReviewStore>({});
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [dueIds, setDueIds] = useState<string[]>([]);
@@ -43,17 +44,17 @@ export default function FlashcardsPage() {
     );
     setReviews(storedReviews);
     setBookmarks(normalizeSavedIds(getLocalStorageItem<unknown>(STORAGE_KEYS.BOOKMARKS, [])));
-    setDueIds(getDueVocabularyIds(N5_VOCABULARY.map((entry) => entry.id), storedReviews));
+    setDueIds(getDueVocabularyIds(levelVocabulary.map((entry) => entry.id), storedReviews));
     updateProgress({
       vocabularyMasteredCount: Object.values(storedReviews).filter(isVocabularyMastered).length,
     });
-  }, [isMounted, updateProgress]);
+  }, [isMounted, levelVocabulary, updateProgress]);
 
   const activeQueue = useMemo(
     () => savedOnly ? dueIds.filter((id) => bookmarks.includes(id)) : dueIds,
     [bookmarks, dueIds, savedOnly],
   );
-  const activeWord = N5_VOCABULARY.find((entry) => entry.id === activeQueue[0]);
+  const activeWord = levelVocabulary.find((entry) => entry.id === activeQueue[0]);
   const masteredCount = Object.values(reviews).filter(isVocabularyMastered).length;
   const nextFutureReview = Object.values(reviews)
     .map((review) => new Date(review.dueAt))
@@ -118,7 +119,7 @@ export default function FlashcardsPage() {
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft sm:p-7 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">N5 deck</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{profile.currentLevel} deck</p>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
               {activeQueue.length ? `${activeQueue.length} card${activeQueue.length === 1 ? '' : 's'} in this session` : `${reviewedCount} reviewed this session`}
             </p>

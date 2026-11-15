@@ -2,16 +2,20 @@
 
 import { useMemo, useState } from 'react';
 import { BookOpen, Search, Sparkles } from 'lucide-react';
-import { N5_GRAMMAR } from '@/content/levels/n5';
+import { useApp } from '@/context/AppContext';
+import { getLevelContent } from '@/content/shared/levelContent';
 
 export default function GrammarPage() {
+  const { profile } = useApp();
+  const level = profile.currentLevel;
+  const grammarList = getLevelContent(level).grammar;
   const [query, setQuery] = useState('');
   const [lesson, setLesson] = useState('All');
 
-  const lessons = Array.from(new Set(N5_GRAMMAR.map((item) => item.lesson))).sort((a, b) => a - b);
+  const lessons = Array.from(new Set(grammarList.map((item) => item.lesson))).sort((a, b) => a - b);
   const patterns = useMemo(() => {
     const term = query.trim().toLocaleLowerCase();
-    return N5_GRAMMAR.filter((item) => {
+    return grammarList.filter((item) => {
       const matchesLesson = lesson === 'All' || item.lesson === Number(lesson);
       const matchesQuery = !term || [
         item.pattern,
@@ -26,14 +30,14 @@ export default function GrammarPage() {
       ].some((value) => value.toLocaleLowerCase().includes(term));
       return matchesLesson && matchesQuery;
     });
-  }, [lesson, query]);
+  }, [grammarList, lesson, query]);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-7 px-4 py-8 sm:px-6 lg:px-8">
       <header className="rounded-3xl bg-gradient-to-br from-brand-700 via-indigo-700 to-violet-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <BookOpen className="h-4 w-4" />
-          JLPT N5 Grammar Library
+          JLPT {level} Grammar Library
         </div>
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -43,7 +47,7 @@ export default function GrammarPage() {
             </p>
           </div>
           <div className="rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold backdrop-blur">
-            {N5_GRAMMAR.length} N5 patterns
+            {grammarList.length} {level} patterns
           </div>
         </div>
       </header>
@@ -82,7 +86,7 @@ export default function GrammarPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-                    N5 · Lesson {item.lesson}
+                    {level} · Lesson {item.lesson}
                   </span>
                   <h2 className="mt-3 text-lg font-bold text-slate-900 dark:text-white">{item.title}</h2>
                 </div>

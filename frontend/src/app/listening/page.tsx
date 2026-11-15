@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Headphones, Languages, Pause, Play } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import StudyLabSkeleton from '@/components/skills/StudyLabSkeleton';
-import { N5_LISTENING } from '@/content/levels/n5';
-import { ListeningConversation } from '@/content/shared/types';
+import { getLevelContent } from '@/content/shared/levelContent';
 
 type TranscriptLanguage = 'Japanese' | 'English' | 'Bangla';
 type PlaybackRate = 0.75 | 1 | 1.25;
@@ -17,15 +16,17 @@ const LANGUAGE_FIELD: Record<TranscriptLanguage, 'japanese' | 'english' | 'bangl
 };
 
 export default function ListeningPage() {
-  const { isMounted } = useApp();
-  const [conversationId, setConversationId] = useState(N5_LISTENING[0].id);
+  const { isMounted, profile } = useApp();
+  const level = profile.currentLevel;
+  const listeningList = getLevelContent(level).listening;
+  const [conversationId, setConversationId] = useState(listeningList[0].id);
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [visibleLanguages, setVisibleLanguages] = useState<TranscriptLanguage[]>(['Japanese']);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState('');
 
-  const conversation = N5_LISTENING.find((item) => item.id === conversationId) ?? N5_LISTENING[0];
+  const conversation = listeningList.find((item) => item.id === conversationId) ?? listeningList[0];
   const speechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   useEffect(() => () => {
@@ -70,7 +71,7 @@ export default function ListeningPage() {
       <header className="rounded-3xl bg-gradient-to-br from-sky-700 via-blue-700 to-indigo-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <Headphones className="h-4 w-4" />
-          JLPT N5 Listening Lab
+          JLPT {level} Listening Lab
         </div>
         <h1 className="mt-3 text-3xl font-black sm:text-4xl">Listen, notice, understand</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
@@ -81,7 +82,7 @@ export default function ListeningPage() {
       <section className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Choose a conversation</h2>
-          {N5_LISTENING.map((item) => (
+          {listeningList.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -108,7 +109,7 @@ export default function ListeningPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">{conversation.title}</h2>
-                <p className="mt-1 text-xs text-slate-500">Original N5 practice conversation · Browser speech synthesis</p>
+                <p className="mt-1 text-xs text-slate-500">Original {level} practice conversation · Browser speech synthesis</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {!isSpeaking ? (

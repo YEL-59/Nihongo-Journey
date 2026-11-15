@@ -259,6 +259,91 @@ export const N5_READINGS: ReadingPassage[] = [
       { prompt: '何を飲みますか。', choices: ['コーヒー', '水', 'お茶'], answer: 2, explanationEn: 'The speaker says お茶を飲みます.', explanationBn: 'বক্তা お茶を飲みます বলেছে।' },
     ],
   },
+  {
+    id: 'shopping-notebook',
+    title: 'Buying stationery',
+    difficulty: 'Starter',
+    topic: 'Shopping and numbers',
+    lines: [
+      [{ text: '今日', reading: 'きょう' }, { text: '、' }, { text: 'デパート' }, { text: 'で' }, { text: 'ノート' }, { text: 'を' }, { text: '三冊', reading: 'さんさつ' }, { text: '買', reading: 'か' }, { text: 'いました。' }],
+      [{ text: '一冊', reading: 'いっさつ' }, { text: '百円', reading: 'ひゃくえん' }, { text: 'でした。' }],
+      [{ text: '赤', reading: 'あか' }, { text: 'い' }, { text: 'ペン' }, { text: 'も' }, { text: '一本', reading: 'いっぽん' }, { text: '買', reading: 'か' }, { text: 'いました。' }],
+    ],
+    translationEn: 'Today I bought three notebooks at the department store. Each notebook was 100 yen. I also bought one red pen.',
+    translationBn: 'আজ আমি ডিপার্টমেন্ট স্টোর থেকে তিনটি নোটবুক কিনেছি। প্রতিটি নোটবুক ছিল ১০০ ইয়েন। আমি একটি লাল কলমও কিনেছি।',
+    questions: [
+      { prompt: 'ノートを何冊買いましたか。', choices: ['一冊', '二冊', '三冊'], answer: 2, explanationEn: 'The first sentence says ノートを三冊買いました (three notebooks).', explanationBn: 'প্রথম বাক্যে ノートを三冊買いました (তিনটি নোটবুক) বলা হয়েছে।' },
+      { prompt: 'ノートはいくらでしたか。', choices: ['一冊百円', '全部で百円', '一本百円'], answer: 0, explanationEn: '一冊百円でした means one notebook cost 100 yen.', explanationBn: '一冊百円でした মানে একটি নোটবুকের দাম ছিল ১০০ ইয়েন।' },
+    ],
+  },
+  {
+    id: 'train-to-kyoto',
+    title: 'Taking the morning train',
+    difficulty: 'Practice',
+    topic: 'Travel and time',
+    lines: [
+      [{ text: '来週', reading: 'らいしゅう' }, { text: 'の日曜日', reading: 'にちようび' }, { text: '、' }, { text: '電車', reading: 'でんしゃ' }, { text: 'で' }, { text: '京都', reading: 'きょうと' }, { text: 'へ' }, { text: '行', reading: 'い' }, { text: 'きます。' }],
+      [{ text: '朝', reading: 'あさ' }, { text: '九時', reading: 'くじ' }, { text: 'に' }, { text: '駅', reading: 'えき' }, { text: 'で' }, { text: '友', reading: 'とも' }, { text: 'だちに' }, { text: '会', reading: 'あ' }, { text: 'います。' }],
+      [{ text: '古', reading: 'ふる' }, { text: 'いお' }, { text: '寺', reading: 'てら' }, { text: 'を' }, { text: '見', reading: 'み' }, { text: 'て、' }, { text: 'おいしい' }, { text: 'お菓子', reading: 'おかし' }, { text: 'を' }, { text: '食', reading: 'た' }, { text: 'べたいです。' }],
+    ],
+    translationEn: 'Next Sunday, I will go to Kyoto by train. I will meet my friend at the station at nine in the morning. I want to see old temples and eat delicious sweets.',
+    translationBn: 'আগামী রবিবার আমি ট্রেনে করে কিয়োটো যাব। সকাল নয়টায় স্টেশনে বন্ধুর সঙ্গে দেখা করব। আমি পুরোনো মন্দির দেখতে আর সুস্বাদু মিষ্টি খেতে চাই।',
+    questions: [
+      { prompt: '何で京都へ行きますか。', choices: ['バス', '電車', '自転車'], answer: 1, explanationEn: '電車で京都へ行きます means going to Kyoto by train.', explanationBn: '電車で京都へ行きます মানে ট্রেনে করে কিয়োটো যাওয়া।' },
+      { prompt: '何時に友だちに会いますか。', choices: ['朝八時', '朝九時', '午後二時'], answer: 1, explanationEn: 'The second sentence says 朝九時に駅で友だちに会います.', explanationBn: 'দ্বিতীয় বাক্যে বলা হয়েছে সকাল নয়টায় স্টেশনে বন্ধুর সঙ্গে দেখা হবে।' },
+    ],
+  },
+  {
+    id: 'family-photo',
+    title: 'My family in Osaka',
+    difficulty: 'Practice',
+    topic: 'Family and daily life',
+    lines: [
+      [{ text: 'わたし' }, { text: 'の' }, { text: '家族', reading: 'かぞく' }, { text: 'は' }, { text: '大阪', reading: 'おおさか' }, { text: 'に' }, { text: '住', reading: 'す' }, { text: 'んでいます。' }],
+      [{ text: '父', reading: 'ちち' }, { text: 'は' }, { text: '会社員', reading: 'かいしゃいん' }, { text: 'で、' }, { text: '母', reading: 'はは' }, { text: 'は' }, { text: '花屋', reading: 'はなや' }, { text: 'で' }, { text: '働', reading: 'はたら' }, { text: 'いています。' }],
+      [{ text: '妹', reading: 'いもうと' }, { text: 'は' }, { text: '高校', reading: 'こうこう' }, { text: 'で' }, { text: '英語', reading: 'えいご' }, { text: 'を' }, { text: '勉強', reading: 'べんきょう' }, { text: 'しています。' }],
+    ],
+    translationEn: 'My family lives in Osaka. My father is an office worker, and my mother works at a flower shop. My younger sister is studying English in high school.',
+    translationBn: 'আমার পরিবার ওসাকায় থাকে। আমার বাবা একজন অফিস কর্মচারী এবং আমার মা একটি ফুলের দোকানে কাজ করেন। আমার ছোট বোন হাই স্কুলে ইংরেজি পড়ছে।',
+    questions: [
+      { prompt: '家族はどこに住んでいますか。', choices: ['東京', '大阪', '京都'], answer: 1, explanationEn: 'The first sentence states 大阪に住んでいます.', explanationBn: 'প্রথম বাক্যে বলা হয়েছে 大阪に住んでいます (ওসাকায় থাকে)।' },
+      { prompt: 'お母さんはどこで働いていますか。', choices: ['花屋', '病院', '銀行'], answer: 0, explanationEn: '母は花屋で働いています means the mother works at a flower shop.', explanationBn: '母は花屋で働いています মানে মা ফুলের দোকানে কাজ করেন।' },
+    ],
+  },
+  {
+    id: 'seasons-in-japan',
+    title: 'Autumn weather',
+    difficulty: 'Challenge',
+    topic: 'Weather and adjectives',
+    lines: [
+      [{ text: '十月', reading: 'じゅうがつ' }, { text: 'になって、' }, { text: '毎日', reading: 'まいにち' }, { text: '涼', reading: 'すず' }, { text: 'しくなりました。' }],
+      [{ text: '山', reading: 'やま' }, { text: 'の木', reading: 'き' }, { text: 'が' }, { text: '赤', reading: 'あか' }, { text: 'くて、とてもきれいです。' }],
+      [{ text: '昨日', reading: 'きのう' }, { text: 'は' }, { text: '雨', reading: 'あめ' }, { text: 'でしたが、' }, { text: '今日', reading: 'きょう' }, { text: 'は' }, { text: '天気', reading: 'てんき' }, { text: 'がいいですから、' }, { text: '散歩', reading: 'さんぽ' }, { text: 'しましょう。' }],
+    ],
+    translationEn: 'Now that it is October, it has become cool every day. The trees on the mountain are red and very pretty. Yesterday was rainy, but today the weather is nice, so let’s take a walk.',
+    translationBn: 'অক্টোবর মাস আসায় প্রতিদিন ঠান্ডা ও আরামদায়ক আবহাওয়া হয়েছে। পাহাড়ের গাছগুলো লাল এবং খুব সুন্দর। গতকাল বৃষ্টি ছিল, কিন্তু আজ আবহাওয়া ভালো, তাই চলুন হাঁটতে যাই।',
+    questions: [
+      { prompt: '昨日の天気はどうでしたか。', choices: ['晴れでした', '雨でした', '雪でした'], answer: 1, explanationEn: '昨日は雨でした means it rained yesterday.', explanationBn: '昨日は雨でした মানে গতকাল বৃষ্টি হয়েছিল।' },
+      { prompt: '今日の天気がいいですから、何をしますか。', choices: ['家で寝ます', '買い物をします', '散歩します'], answer: 2, explanationEn: 'The passage ends with 散歩しましょう (let’s take a walk).', explanationBn: 'অনুচ্ছেদের শেষে বলা হয়েছে 散歩しましょう (চলুন হাঁটতে যাই)।' },
+    ],
+  },
+  {
+    id: 'first-sushi',
+    title: 'Trying something new',
+    difficulty: 'Challenge',
+    topic: 'Experiences and hobbies',
+    lines: [
+      [{ text: 'わたし' }, { text: 'は' }, { text: '日本料理', reading: 'にほんりょうり' }, { text: 'を' }, { text: '作', reading: 'つく' }, { text: 'ったことがあります。' }],
+      [{ text: '先月', reading: 'せんげつ' }, { text: '、' }, { text: '料理教室', reading: 'りょうりきょうしつ' }, { text: 'で' }, { text: '先生', reading: 'せんせい' }, { text: 'に' }, { text: '習', reading: 'なら' }, { text: 'いました。' }],
+      [{ text: '少', reading: 'すこ' }, { text: 'し' }, { text: '難', reading: 'むずか' }, { text: 'しかったですが、とても' }, { text: '楽', reading: 'たの' }, { text: 'しかったです。' }],
+    ],
+    translationEn: 'I have made Japanese food before. Last month, I learned from a teacher at a cooking class. It was a little difficult, but it was very fun.',
+    translationBn: 'আমি আগে জাপানি খাবার তৈরি করেছি। গত মাসে আমি একটি রান্নার ক্লাসে শিক্ষকের কাছ থেকে শিখেছি। এটি একটু কঠিন ছিল, কিন্তু খুব মজার ছিল।',
+    questions: [
+      { prompt: 'いつ料理教室で習いましたか。', choices: ['先週', '先月', '来年'], answer: 1, explanationEn: '先月 means last month.', explanationBn: '先月 অর্থ গত মাসে।' },
+      { prompt: '料理を作ることはどうでしたか。', choices: ['難しかったですが、楽しかったです', '易しくてつまらなかったです', 'ぜんぜん楽しくなかったです'], answer: 0, explanationEn: 'The final sentence says 少し難しかったですが、とても楽しかったです.', explanationBn: 'শেষ বাক্যে বলা হয়েছে একটু কঠিন হলেও খুব মজার ছিল।' },
+    ],
+  },
 ];
 
 export const N5_LISTENING: ListeningConversation[] = [
@@ -303,6 +388,78 @@ export const N5_LISTENING: ListeningConversation[] = [
       { prompt: '何時に学校へ行きますか。', choices: ['六時', '七時', '八時'], answer: 2, explanationEn: 'B says 八時に行きます.', explanationBn: 'B বলেছে 八時に行きます।' },
     ],
   },
+  {
+    id: 'buying-bread',
+    title: 'At the bakery',
+    level: 'N5',
+    lines: [
+      { speaker: 'A', japanese: 'いらっしゃいませ。', english: 'Welcome.', bangla: 'স্বাগতম।' },
+      { speaker: 'B', japanese: 'すみません、このりんごパンを二つください。', english: 'Excuse me, please give me two of these apple breads.', bangla: 'দুঃখিত, এই আপেল রুটি দুটি দিন।' },
+      { speaker: 'A', japanese: 'はい、全部で四百円です。', english: 'Yes, the total is 400 yen.', bangla: 'জি, সব মিলিয়ে ৪০০ ইয়েন।' },
+    ],
+    questions: [
+      { prompt: 'Bさんはパンをいくつ買いますか。', choices: ['一つ', '二つ', '三つ'], answer: 1, explanationEn: 'B says 二つください (two, please).', explanationBn: 'B বলেছে 二つください (দুটি দিন)।' },
+      { prompt: '全部でいくらですか。', choices: ['二百円', '三百円', '四百円'], answer: 2, explanationEn: 'A says 全部で四百円です (400 yen in total).', explanationBn: 'A বলেছে 全部で四百円です (মোট ৪০০ ইয়েন)।' },
+    ],
+  },
+  {
+    id: 'asking-directions',
+    title: 'Finding the post office',
+    level: 'N5',
+    lines: [
+      { speaker: 'A', japanese: 'すみません、郵便局はどこにありますか。', english: 'Excuse me, where is the post office?', bangla: 'মাফ করবেন, পোস্ট অফিস কোথায়?' },
+      { speaker: 'B', japanese: 'あの銀行の隣にありますよ。', english: 'It is right next to that bank.', bangla: 'ওই ব্যাংকের পাশেই আছে।' },
+      { speaker: 'A', japanese: 'ありがとうございます。歩いて何分ですか。', english: 'Thank you. How many minutes on foot?', bangla: 'ধন্যবাদ। হেঁটে যেতে কত মিনিট লাগে?' },
+      { speaker: 'B', japanese: '三分ぐらいです。', english: 'About three minutes.', bangla: 'প্রায় তিন মিনিট।' },
+    ],
+    questions: [
+      { prompt: '郵便局はどこにありますか。', choices: ['駅の中', '銀行の隣', '公園の前'], answer: 1, explanationEn: 'B says 銀行の隣にあります (next to the bank).', explanationBn: 'B বলেছে 銀行の隣にあります (ব্যাংকের পাশে)।' },
+      { prompt: '歩いて何分ぐらいですか。', choices: ['三分ぐらい', '十分ぐらい', '十五分ぐらい'], answer: 0, explanationEn: 'B answers 三分ぐらいです (about three minutes).', explanationBn: 'B উত্তর দিয়েছে 三分ぐらいです (প্রায় তিন মিনিট)।' },
+    ],
+  },
+  {
+    id: 'weekend-weather',
+    title: 'Weekend weather and plans',
+    level: 'N5',
+    lines: [
+      { speaker: 'A', japanese: '明日は晴れですか。', english: 'Will it be sunny tomorrow?', bangla: 'আগামীকাল কি রোদ থাকবে?' },
+      { speaker: 'B', japanese: 'いいえ、午後は雨になりますよ。', english: 'No, it will rain in the afternoon.', bangla: 'না, বিকেলে বৃষ্টি হবে।' },
+      { speaker: 'A', japanese: 'そうですか。じゃあ、図書館で勉強しましょう。', english: 'I see. Then let’s study at the library.', bangla: 'তাই নাকি। তাহলে চলুন লাইব্রেরিতে পড়াশোনা করি।' },
+    ],
+    questions: [
+      { prompt: '明日の午後の天気はどうですか。', choices: ['晴れです', '雨です', '雪です'], answer: 1, explanationEn: 'B says 午後は雨になります (it will rain in the afternoon).', explanationBn: 'B বলেছে বিকেলে বৃষ্টি হবে।' },
+      { prompt: '二人はどこで勉強しますか。', choices: ['公園', 'カフェ', '図書館'], answer: 2, explanationEn: 'A suggests 図書館で勉強しましょう.', explanationBn: 'A প্রস্তাব দিয়েছে লাইব্রেরিতে পড়াশোনা করার।' },
+    ],
+  },
+  {
+    id: 'doctor-visit',
+    title: 'At the clinic',
+    level: 'N5',
+    lines: [
+      { speaker: 'A', japanese: 'どうしましたか。', english: 'What is the matter?', bangla: 'কী হয়েছে?' },
+      { speaker: 'B', japanese: '昨日から頭が痛いです。', english: 'I have had a headache since yesterday.', bangla: 'গতকাল থেকে আমার মাথা ব্যথা করছে।' },
+      { speaker: 'A', japanese: 'この薬を飲んで、今日はゆっくり休んでください。', english: 'Please take this medicine and rest well today.', bangla: 'এই ওষুধটি খেয়ে আজ ভালোভাবে বিশ্রাম নিন।' },
+    ],
+    questions: [
+      { prompt: 'Bさんはどこが痛いですか。', choices: ['頭', 'おなか', 'のど'], answer: 0, explanationEn: 'B says 頭が痛いです (my head hurts).', explanationBn: 'B বলেছে 頭が痛いです (মাথা ব্যথা)।' },
+      { prompt: '医者は何をしてくださいと言いましたか。', choices: ['運動してください', '薬を飲んで休んでください', '仕事に行ってください'], answer: 1, explanationEn: 'The doctor says この薬を飲んで、今日はゆっくり休んでください.', explanationBn: 'ডাক্তার ওষুধ খেয়ে আজ বিশ্রাম নিতে বলেছেন।' },
+    ],
+  },
+  {
+    id: 'travel-experience',
+    title: 'Talking about a trip',
+    level: 'N5',
+    lines: [
+      { speaker: 'A', japanese: '北海道へ行ったことがありますか。', english: 'Have you ever been to Hokkaido?', bangla: 'আপনি কি কখনো হোক্কাইডো গিয়েছেন?' },
+      { speaker: 'B', japanese: 'はい、去年の冬に行きました。', english: 'Yes, I went last winter.', bangla: 'হ্যাঁ, গত শীতে গিয়েছিলাম।' },
+      { speaker: 'A', japanese: 'どうでしたか。', english: 'How was it?', bangla: 'কেমন ছিল?' },
+      { speaker: 'B', japanese: 'とても寒かったですが、雪がきれいでした。', english: 'It was very cold, but the snow was beautiful.', bangla: 'খুব ঠান্ডা ছিল, তবে তুষার খুব সুন্দর ছিল।' },
+    ],
+    questions: [
+      { prompt: 'Bさんはいつ北海道へ行きましたか。', choices: ['去年の夏', '去年の冬', '今年の春'], answer: 1, explanationEn: 'B says 去年の冬に行きました (went last winter).', explanationBn: 'B বলেছে 去年の冬に行きました (গত শীতে)।' },
+      { prompt: '北海道はどうでしたか。', choices: ['暑くてにぎやかでした', '寒かったですが、雪がきれいでした', '静かでつまらなかったです'], answer: 1, explanationEn: 'B says とても寒かったですが、雪がきれいでした.', explanationBn: 'B বলেছে খুব ঠান্ডা ছিল, কিন্তু তুষার সুন্দর ছিল।' },
+    ],
+  },
 ];
 
 export const N5_SPEAKING_PROMPTS: SpeakingPrompt[] = [
@@ -341,5 +498,41 @@ export const N5_SPEAKING_PROMPTS: SpeakingPrompt[] = [
     meaningEn: 'Please say that once more, slowly.',
     meaningBn: 'অনুগ্রহ করে আরেকবার ধীরে বলুন।',
     goal: 'Make the request clear and polite.',
+  },
+  {
+    id: 'ordering-food',
+    title: 'Order at a café',
+    level: 'N5',
+    japanese: 'すみません、あついお茶を一つください。',
+    meaningEn: 'Excuse me, please give me one hot tea.',
+    meaningBn: 'দুঃখিত, আমাকে এক কাপ গরম চা দিন।',
+    goal: 'Combine すみません, the item, counter, and ください smoothly.',
+  },
+  {
+    id: 'asking-way',
+    title: 'Ask for directions',
+    level: 'N5',
+    japanese: 'すみません、駅はどこにありますか。',
+    meaningEn: 'Excuse me, where is the station?',
+    meaningBn: 'মাফ করবেন, স্টেশনটি কোথায়?',
+    goal: 'Use rising intonation on か to sound polite and clear.',
+  },
+  {
+    id: 'talking-hobbies',
+    title: 'Share what you want to do',
+    level: 'N5',
+    japanese: '来年、日本へ行って、京都を見たいです。',
+    meaningEn: 'Next year, I want to go to Japan and see Kyoto.',
+    meaningBn: 'আগামী বছর আমি জাপানে গিয়ে কিয়োটো দেখতে চাই।',
+    goal: 'Link two actions with て-form and finish with たいです.',
+  },
+  {
+    id: 'past-experience',
+    title: 'Talk about an experience',
+    level: 'N5',
+    japanese: 'わたしは日本料理を作ったことがあります。',
+    meaningEn: 'I have made Japanese food before.',
+    meaningBn: 'আমি আগে জাপানি খাবার তৈরি করেছি।',
+    goal: 'Keep た-form + ことがあります connected without pausing mid-phrase.',
   },
 ];

@@ -22,3 +22,7 @@ export function getLevelMetadata(level: JLPTLevel): LevelMetadata {
 export function isLevelAvailable(level: JLPTLevel): boolean {
   return getLevelMetadata(level).status === 'available';
 }
+
+export function isLevelSelectable(level: JLPTLevel): boolean {
+  return getLevelMetadata(level).status !== 'planned';
+}

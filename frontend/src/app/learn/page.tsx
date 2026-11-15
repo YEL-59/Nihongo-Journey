@@ -3,11 +3,14 @@
 import Link from 'next/link';
 import { BookOpen, CheckCircle2, Clock3, Sparkles } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { CURRICULUM_PHASES, LESSONS_CURRICULUM } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 
 export default function LearnPage() {
-  const { progress } = useApp();
-  const completedSet = new Set(progress.completedLessons ?? []);
+  const { profile, getLevelProgress } = useApp();
+  const level = profile.currentLevel;
+  const { phases, curriculum } = getLevelContent(level);
+  const levelProgress = getLevelProgress(level);
+  const completedSet = new Set(levelProgress.completedLessons ?? []);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -16,9 +19,9 @@ export default function LearnPage() {
           <Sparkles className="h-4 w-4" />
           Learning Center
         </div>
-        <h1 className="mt-3 text-3xl font-black sm:text-4xl">Minna no Nihongo N5 Path</h1>
+        <h1 className="mt-3 text-3xl font-black sm:text-4xl">JLPT {level} Learning Path</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/80 sm:text-base">
-          Study the full beginner curriculum with bilingual guidance, vocabulary practice, listening prompts, and structured lesson checkpoints.
+          Study the full {level} curriculum with bilingual guidance, vocabulary practice, listening prompts, and structured lesson checkpoints.
         </p>
       </div>
 
@@ -28,7 +31,7 @@ export default function LearnPage() {
             <BookOpen className="h-4 w-4 text-brand-600" />
             Lessons available
           </div>
-          <div className="mt-3 text-3xl font-black text-slate-900">{LESSONS_CURRICULUM.length}</div>
+          <div className="mt-3 text-3xl font-black text-slate-900">{curriculum.length}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -42,13 +45,13 @@ export default function LearnPage() {
             <Clock3 className="h-4 w-4 text-amber-600" />
             Study time
           </div>
-          <div className="mt-3 text-3xl font-black text-slate-900">{LESSONS_CURRICULUM.reduce((total, lesson) => total + lesson.estimatedMinutes, 0)} min</div>
+          <div className="mt-3 text-3xl font-black text-slate-900">{curriculum.reduce((total, lesson) => total + lesson.estimatedMinutes, 0)} min</div>
         </div>
       </div>
 
       <div className="space-y-8">
-        {CURRICULUM_PHASES.map((phase) => {
-          const lessons = LESSONS_CURRICULUM.filter((lesson) => lesson.phase === phase.phase);
+        {phases.map((phase) => {
+          const lessons = curriculum.filter((lesson) => lesson.phase === phase.phase);
 
           return (
             <section key={phase.phase} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft sm:p-6">
@@ -64,7 +67,7 @@ export default function LearnPage() {
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {lessons.map((lesson) => {
                   const isCompleted = completedSet.has(lesson.lessonNumber);
-                  const isCurrent = progress.currentLessonId === lesson.lessonNumber;
+                  const isCurrent = levelProgress.currentLessonId === lesson.lessonNumber;
 
                   return (
                     <Link

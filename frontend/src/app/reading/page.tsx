@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { BookOpen, Languages } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import StudyLabSkeleton from '@/components/skills/StudyLabSkeleton';
-import { N5_READINGS } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 import { ReadingPassage } from '@/content/shared/types';
 
 function FuriganaLine({ segments, showFurigana }: { segments: ReadingPassage['lines'][number]; showFurigana: boolean }) {
@@ -22,7 +22,9 @@ function FuriganaLine({ segments, showFurigana }: { segments: ReadingPassage['li
 }
 
 export default function ReadingPage() {
-  const { isMounted } = useApp();
+  const { isMounted, profile } = useApp();
+  const level = profile.currentLevel;
+  const readings = getLevelContent(level).readings;
   const [showFurigana, setShowFurigana] = useState(true);
   const [translations, setTranslations] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -38,7 +40,7 @@ export default function ReadingPage() {
       <header className="rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-700 to-cyan-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <BookOpen className="h-4 w-4" />
-          JLPT N5 Reading Lab
+          JLPT {level} Reading Lab
         </div>
         <h1 className="mt-3 text-3xl font-black sm:text-4xl">Read a little every day</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
@@ -58,12 +60,12 @@ export default function ReadingPage() {
       </header>
 
       <section className="grid gap-5 lg:grid-cols-2" aria-label="Reading passages">
-        {N5_READINGS.map((passage) => (
+        {readings.map((passage) => (
           <article key={passage.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
-                  N5 · {passage.difficulty} · {passage.topic}
+                  {level} · {passage.difficulty} · {passage.topic}
                 </span>
                 <h2 className="mt-3 text-xl font-black text-slate-900 dark:text-white">{passage.title}</h2>
               </div>

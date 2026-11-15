@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { LearningLanguageMode } from '@/lib/storage';
+import { JLPT_LEVELS, isLevelSelectable } from '@/content/shared/registry';
 
 interface HeaderProps {
   onToggleMobileDrawer?: () => void;
@@ -29,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   isMobileDrawerOpen = false,
 }) => {
   const pathname = usePathname();
-  const { preferences, updatePreferences, setLanguageMode, toggleRomaji, dailyActivity, profile } = useApp();
+  const { preferences, updatePreferences, updateProfile, setLanguageMode, toggleRomaji, dailyActivity, profile } = useApp();
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   const isDark = preferences.theme === 'dark';
@@ -49,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left Brand & Mobile Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             {onToggleMobileDrawer && (
               <button
                 type="button"
@@ -72,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
                     Nihongo <span className="text-brand-600 dark:text-brand-400">Journey</span>
                   </span>
                   <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-torii-50 dark:bg-torii-500/10 text-torii-600 dark:text-torii-400 border border-torii-200 dark:border-torii-500/20">
-                    JLPT {profile.targetLevel}
+                    Goal {profile.targetLevel}
                   </span>
                 </div>
                 <span className="text-[10px] font-jp text-slate-500 dark:text-slate-400 -mt-1 hidden sm:block">
@@ -102,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              Roadmap (N5)
+              Roadmap
             </Link>
             <Link
               href="/learn"
@@ -112,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              Lessons (1-25)
+              Lessons
             </Link>
             <Link
               href="/hiragana"
@@ -147,10 +148,10 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             {/* Daily Streak Counter with Glow */}
             <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs font-bold shadow-sm"
+              className="flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs font-bold shadow-sm"
               title={`${dailyActivity.currentStreak} day study streak! Keep practicing today.`}
             >
               <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
@@ -173,19 +174,41 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-bold">{preferences.showRomaji ? 'ON' : 'OFF'}</span>
             </button>
 
+            <label className="sr-only" htmlFor="current-study-level">
+              Current study level
+            </label>
+            <select
+              id="current-study-level"
+              value={profile.currentLevel}
+              onChange={(event) => {
+                const selectedLevel = JLPT_LEVELS.find(({ level }) => level === event.target.value)?.level;
+                if (selectedLevel && isLevelSelectable(selectedLevel)) {
+                  updateProfile({ currentLevel: selectedLevel });
+                }
+              }}
+              title={`Current study level: ${profile.currentLevel}`}
+              className="w-14 sm:w-auto max-w-[6rem] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1 sm:px-2 py-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              {JLPT_LEVELS.map(({ level, status }) => (
+                <option key={level} value={level} disabled={!isLevelSelectable(level)}>
+                  {level} · {status === 'in-progress' ? 'In progress' : status}
+                </option>
+              ))}
+            </select>
+
             {/* Language Mode Selector Dropdown */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-0 sm:gap-1 px-1.5 sm:px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 aria-label="Select explanation language mode"
               >
                 <Globe2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                 <span className="hidden sm:inline uppercase font-bold text-[11px]">
                   {preferences.languageMode}
                 </span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown className="hidden sm:block w-3 h-3 text-slate-400" />
               </button>
 
               {isLangMenuOpen && (

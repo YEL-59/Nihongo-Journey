@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Mic, Play, Square, Volume2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import StudyLabSkeleton from '@/components/skills/StudyLabSkeleton';
-import { N5_SPEAKING_PROMPTS } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 
 function mediaErrorMessage(error: unknown) {
   const name = error instanceof DOMException
@@ -32,8 +32,10 @@ function mediaErrorMessage(error: unknown) {
 }
 
 export default function SpeakingPage() {
-  const { isMounted } = useApp();
-  const [promptId, setPromptId] = useState(N5_SPEAKING_PROMPTS[0].id);
+  const { isMounted, profile } = useApp();
+  const level = profile.currentLevel;
+  const speakingPrompts = getLevelContent(level).speakingPrompts;
+  const [promptId, setPromptId] = useState(speakingPrompts[0].id);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -46,7 +48,7 @@ export default function SpeakingPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const mountedRef = useRef(true);
-  const prompt = N5_SPEAKING_PROMPTS.find((item) => item.id === promptId) ?? N5_SPEAKING_PROMPTS[0];
+  const prompt = speakingPrompts.find((item) => item.id === promptId) ?? speakingPrompts[0];
   const speechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   useEffect(() => {
@@ -210,7 +212,7 @@ export default function SpeakingPage() {
       <header className="rounded-3xl bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <Mic className="h-4 w-4" />
-          JLPT N5 Speaking Lab
+          JLPT {level} Speaking Lab
         </div>
         <h1 className="mt-3 text-3xl font-black sm:text-4xl">Listen, speak, and reflect</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
@@ -221,7 +223,7 @@ export default function SpeakingPage() {
       <section className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Choose a speaking goal</h2>
-          {N5_SPEAKING_PROMPTS.map((item) => (
+          {speakingPrompts.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -251,7 +253,7 @@ export default function SpeakingPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-800 dark:bg-violet-950/50 dark:text-violet-200">
-                  N5 · Shadowing practice
+                  {level} · Shadowing practice
                 </span>
                 <h2 className="mt-3 text-xl font-black text-slate-900 dark:text-white">{prompt.title}</h2>
                 <p className="mt-3 font-jp text-xl leading-relaxed text-slate-900 dark:text-white">{prompt.japanese}</p>

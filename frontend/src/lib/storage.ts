@@ -1,3 +1,5 @@
+import type { JLPTLevel } from '@/content/shared/types';
+
 // Storage keys defined in requirements.md
 export const STORAGE_KEYS = {
   PROFILE: 'nihongo_user_profile',
@@ -32,7 +34,8 @@ export interface UserPreferences {
 
 export interface UserProfile {
   name: string;
-  targetLevel: 'N5' | 'N4' | 'N3';
+  currentLevel: JLPTLevel;
+  targetLevel: JLPTLevel;
   startedAt: string;
   hasCompletedOnboarding: boolean;
   avatarSeed?: string;
@@ -45,6 +48,12 @@ export interface DailyActivity {
   history: Record<string, number>; // YYYY-MM-DD -> minutes studied
 }
 
+export interface LevelProgressSnapshot {
+  currentLessonId: number;
+  completedLessons: number[];
+  completedSections: Record<number, string[]>; // lessonId -> sectionIds
+}
+
 export interface LearningProgress {
   currentLessonId: number;
   completedLessons: number[];
@@ -53,6 +62,7 @@ export interface LearningProgress {
   kanjiMasteredCount: number;
   grammarPointsLearnedCount: number;
   streakDays: number;
+  levelProgress?: Partial<Record<JLPTLevel, LevelProgressSnapshot>>;
 }
 
 export type VocabularyReviewRating = 'again' | 'hard' | 'good' | 'easy';
@@ -97,10 +107,11 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
 
 export const DEFAULT_PROFILE: UserProfile = {
   name: 'Learner',
+  currentLevel: 'N5',
   targetLevel: 'N5',
   startedAt: new Date().toISOString(),
   hasCompletedOnboarding: false,
-  studyGoal: 'Pass JLPT N5 & Study/Work in Japan',
+  studyGoal: 'Learn Japanese for travel, study, work, or JLPT',
 };
 
 export const DEFAULT_DAILY_ACTIVITY: DailyActivity = {
@@ -120,6 +131,20 @@ export const DEFAULT_PROGRESS: LearningProgress = {
   grammarPointsLearnedCount: 3,
   streakDays: 1,
 };
+
+// Quiz and exam attempts share one history list. Attempts saved before level
+// tagging have no `level`; exam ids start with the level ("n4-..."), and
+// everything older than that was recorded while only N5 existed.
+export function getAttemptLevel(attempt: unknown): JLPTLevel {
+  if (typeof attempt !== 'object' || attempt === null) return 'N5';
+  const { level, id } = attempt as { level?: unknown; id?: unknown };
+  if (typeof level === 'string' && /^N[1-5]$/.test(level)) return level as JLPTLevel;
+  if (typeof id === 'string') {
+    const match = /^n([1-5])-/.exec(id);
+    if (match) return `N${match[1]}` as JLPTLevel;
+  }
+  return 'N5';
+}
 
 // Safe LocalStorage Helpers
 export function getLocalStorageItem<T>(key: string, fallback: T): T {

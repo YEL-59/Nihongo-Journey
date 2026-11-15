@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Bookmark, BookOpen, Search, Volume2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { N5_VOCABULARY } from '@/content/levels/n5';
+import { getLevelContent } from '@/content/shared/levelContent';
 import { VocabularyCategory } from '@/content/shared/types';
 import { getLocalStorageItem, setLocalStorageItem, STORAGE_KEYS } from '@/lib/storage';
 import { normalizeSavedIds } from '@/lib/study';
@@ -11,7 +11,8 @@ import { normalizeSavedIds } from '@/lib/study';
 const CATEGORIES: Array<'All' | VocabularyCategory> = ['All', 'Greetings', 'Food', 'Verbs', 'Numbers', 'Time', 'Travel', 'Places', 'People', 'Adjectives', 'Daily Life'];
 
 export default function VocabularyPage() {
-  const { isMounted, preferences, playSpeech } = useApp();
+  const { isMounted, preferences, profile, playSpeech } = useApp();
+  const levelVocabulary = getLevelContent(profile.currentLevel).vocabulary;
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<'All' | VocabularyCategory>('All');
   const [level, setLevel] = useState('All');
@@ -21,9 +22,9 @@ export default function VocabularyPage() {
     if (isMounted) setBookmarks(normalizeSavedIds(getLocalStorageItem<unknown>(STORAGE_KEYS.BOOKMARKS, [])));
   }, [isMounted]);
 
-  const levels = Array.from(new Set(N5_VOCABULARY.map((entry) => entry.level)));
+  const levels = Array.from(new Set(levelVocabulary.map((entry) => entry.level)));
   const normalizedQuery = query.trim().toLocaleLowerCase();
-  const filteredVocabulary = N5_VOCABULARY.filter((entry) => {
+  const filteredVocabulary = levelVocabulary.filter((entry) => {
     const matchesQuery = !normalizedQuery || [
       entry.japanese,
       entry.reading,
@@ -68,7 +69,7 @@ export default function VocabularyPage() {
       <header className="rounded-3xl bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-800 p-6 text-white shadow-xl sm:p-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/75">
           <BookOpen className="h-4 w-4" />
-          N5 Vocabulary Library
+          JLPT {profile.currentLevel} Vocabulary Library
         </div>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -78,7 +79,7 @@ export default function VocabularyPage() {
             </p>
           </div>
           <div className="rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold backdrop-blur">
-            {N5_VOCABULARY.length} starter words
+            {levelVocabulary.length} {profile.currentLevel} words
           </div>
         </div>
       </header>

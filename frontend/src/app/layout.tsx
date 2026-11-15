@@ -4,13 +4,13 @@ import { AppProvider } from '@/context/AppContext';
 import { AppShell } from '@/components/layout/AppShell';
 
 export const metadata: Metadata = {
-  title: 'Nihongo Journey (にほんご Journey) | Absolute Beginner to JLPT N5 Mastery',
+  title: 'Nihongo Journey (にほんご Journey) | JLPT N5–N1 Japanese Learning',
   description:
-    'A comprehensive, self-paced Japanese language learning platform featuring Minna no Nihongo N5 lessons, Kana practice, SRS flashcards, and trilingual explanations in Bangla, English & Japanese.',
+    'A self-paced Japanese learning path from JLPT N5 to N1, with all five levels available and trilingual explanations in Bangla, English, and Japanese.',
   keywords: [
     'Japanese learning',
     'JLPT N5',
-    'Minna no Nihongo',
+    'JLPT N5 to N1',
     'Learn Japanese in Bangla',
     'Hiragana',
     'Katakana',

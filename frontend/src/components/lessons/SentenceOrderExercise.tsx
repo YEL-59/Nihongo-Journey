@@ -13,25 +13,28 @@ interface Props {
 
 export default function SentenceOrderExercise({ exercise, languageMode, onAnswer }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
-  const [used, setUsed] = useState<string[]>([]);
+  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const available = useMemo(
-    () => exercise.parts.filter((part) => !used.includes(part)),
-    [exercise.parts, used],
+    () =>
+      exercise.parts
+        .map((part, index) => ({ part, index }))
+        .filter(({ index }) => !usedIndices.includes(index)),
+    [exercise.parts, usedIndices],
   );
 
   const isCorrect = JSON.stringify(selected) === JSON.stringify(exercise.correctOrder);
 
-  function handleAdd(part: string) {
-    if (submitted || used.includes(part)) return;
-    setUsed((current) => [...current, part]);
+  function handleAdd(part: string, index: number) {
+    if (submitted || usedIndices.includes(index)) return;
+    setUsedIndices((current) => [...current, index]);
     setSelected((current) => [...current, part]);
   }
 
   function handleReset() {
     setSelected([]);
-    setUsed([]);
+    setUsedIndices([]);
     setSubmitted(false);
   }
 
@@ -71,12 +74,12 @@ export default function SentenceOrderExercise({ exercise, languageMode, onAnswer
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Available parts</p>
         <div className="flex flex-wrap gap-2">
-          {available.map((part) => (
+          {available.map(({ part, index }) => (
             <button
-              key={part}
+              key={`${part}-${index}`}
               type="button"
               disabled={submitted}
-              onClick={() => handleAdd(part)}
+              onClick={() => handleAdd(part, index)}
               className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {part}

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, ClipboardCheck, History, RotateCcw, Trophy, XCircle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { getLessonDetail, LESSONS_CURRICULUM, N5_VOCABULARY } from '@/content/levels/n5';
-import { STORAGE_KEYS } from '@/lib/storage';
+import { getLevelContent } from '@/content/shared/levelContent';
+import type { JLPTLevel, VocabularyEntry } from '@/content/shared/types';
+import { STORAGE_KEYS, getAttemptLevel } from '@/lib/storage';
 
 type QuizSource = 'lessons' | 'vocabulary' | 'mixed';
 
@@ -23,6 +24,7 @@ interface PoolQuestion {
 interface QuizAttempt {
   id: string;
   kind: 'quiz';
+  level?: JLPTLevel;
   completedAt: string;
   source: QuizSource;
   lessonFrom: number;
@@ -46,7 +48,8 @@ function shuffle<T>(items: T[]): T[] {
   return copy;
 }
 
-function buildLessonPool(from: number, to: number): PoolQuestion[] {
+function buildLessonPool(from: number, to: number, level: JLPTLevel): PoolQuestion[] {
+  const { getLessonDetail } = getLevelContent(level);
   const pool: PoolQuestion[] = [];
   for (let lesson = from; lesson <= to; lesson += 1) {
     const detail = getLessonDetail(lesson);
@@ -80,9 +83,9 @@ function buildLessonPool(from: number, to: number): PoolQuestion[] {
   return pool;
 }
 
-function buildVocabularyPool(): PoolQuestion[] {
-  return N5_VOCABULARY.map((word) => {
-    const distractors = shuffle(N5_VOCABULARY.filter((other) => other.meaningEn !== word.meaningEn))
+function buildVocabularyPool(vocabulary: VocabularyEntry[]): PoolQuestion[] {
+  return vocabulary.map((word) => {
+    const distractors = shuffle(vocabulary.filter((other) => other.meaningEn !== word.meaningEn))
       .slice(0, 3)
       .map((other) => other.meaningEn);
     const choices = shuffle([word.meaningEn, ...distractors]);
@@ -99,12 +102,12 @@ function buildVocabularyPool(): PoolQuestion[] {
   });
 }
 
-function readAttempts(): QuizAttempt[] {
+function readAttempts(level: JLPTLevel): QuizAttempt[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEYS.QUIZ_HISTORY);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is QuizAttempt => typeof item === 'object' && item !== null && (item as QuizAttempt).kind === 'quiz');
+    return parsed.filter((item): item is QuizAttempt => typeof item === 'object' && item !== null && (item as QuizAttempt).kind === 'quiz' && getAttemptLevel(item) === level);
   } catch {
     return [];
   }
@@ -135,7 +138,9 @@ function saveAttempt(attempt: QuizAttempt, minutes: number): string | null {
 }
 
 export default function QuizPage() {
-  const { isMounted, preferences, playSpeech } = useApp();
+  const { isMounted, preferences, playSpeech, profile } = useApp();
+  const level = profile.currentLevel;
+  const { curriculum, vocabulary } = getLevelContent(level);
   const [source, setSource] = useState<QuizSource>('mixed');
   const [lessonFrom, setLessonFrom] = useState(1);
   const [lessonTo, setLessonTo] = useState(5);
@@ -149,22 +154,25 @@ export default function QuizPage() {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
 
   useEffect(() => {
-    if (isMounted) setAttempts(readAttempts());
-  }, [isMounted]);
+    if (isMounted) setAttempts(readAttempts(level));
+  }, [isMounted, level]);
 
   const showEnglish = preferences.languageMode === 'en' || preferences.languageMode === 'all';
   const showBangla = preferences.languageMode === 'bn' || preferences.languageMode === 'all';
 
+  const effectiveLessonTo = Math.min(lessonTo, curriculum.length);
+  const effectiveLessonFrom = Math.min(lessonFrom, effectiveLessonTo);
+
   const poolSize = useMemo(() => {
-    const lessonCount = buildLessonPool(lessonFrom, lessonTo).length;
+    const lessonCount = buildLessonPool(effectiveLessonFrom, effectiveLessonTo, level).length;
     if (source === 'lessons') return lessonCount;
-    if (source === 'vocabulary') return N5_VOCABULARY.length;
-    return lessonCount + N5_VOCABULARY.length;
-  }, [source, lessonFrom, lessonTo]);
+    if (source === 'vocabulary') return vocabulary.length;
+    return lessonCount + vocabulary.length;
+  }, [source, effectiveLessonFrom, effectiveLessonTo, level, vocabulary]);
 
   function startQuiz() {
-    const lessonPool = source === 'vocabulary' ? [] : buildLessonPool(lessonFrom, lessonTo);
-    const vocabPool = source === 'lessons' ? [] : buildVocabularyPool();
+    const lessonPool = source === 'vocabulary' ? [] : buildLessonPool(effectiveLessonFrom, effectiveLessonTo, level);
+    const vocabPool = source === 'lessons' ? [] : buildVocabularyPool(vocabulary);
     const picked = shuffle([...lessonPool, ...vocabPool]).slice(0, length);
     setQuestions(picked);
     setCurrent(0);
@@ -180,6 +188,7 @@ export default function QuizPage() {
     const attempt: QuizAttempt = {
       id: `quiz-${startedAt ?? Date.now()}`,
       kind: 'quiz',
+      level,
       completedAt: new Date().toISOString(),
       source,
       lessonFrom,
@@ -189,7 +198,7 @@ export default function QuizPage() {
     };
     const error = saveAttempt(attempt, minutes);
     if (error) setSaveError(error);
-    setAttempts(readAttempts());
+    setAttempts(readAttempts(level));
     setFinished(true);
   }
 
@@ -246,17 +255,17 @@ export default function QuizPage() {
                   }}
                   className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 >
-                  {LESSONS_CURRICULUM.map((l) => <option key={l.lessonNumber} value={l.lessonNumber}>Lesson {l.lessonNumber}</option>)}
+                  {curriculum.map((l) => <option key={l.lessonNumber} value={l.lessonNumber}>Lesson {l.lessonNumber}</option>)}
                 </select>
               </label>
               <label className="text-xs font-semibold text-slate-500">
                 To lesson
                 <select
-                  value={lessonTo}
+                  value={effectiveLessonTo}
                   onChange={(e) => setLessonTo(Number(e.target.value))}
                   className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 >
-                  {LESSONS_CURRICULUM.filter((l) => l.lessonNumber >= lessonFrom).map((l) => <option key={l.lessonNumber} value={l.lessonNumber}>Lesson {l.lessonNumber}</option>)}
+                  {curriculum.filter((l) => l.lessonNumber >= effectiveLessonFrom).map((l) => <option key={l.lessonNumber} value={l.lessonNumber}>Lesson {l.lessonNumber}</option>)}
                 </select>
               </label>
             </div>

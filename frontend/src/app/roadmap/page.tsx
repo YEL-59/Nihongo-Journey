@@ -18,23 +18,27 @@ import {
   Compass,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { LESSONS_CURRICULUM, CURRICULUM_PHASES } from '@/content/levels/n5';
-import { LessonCurriculumItem } from '@/content/shared/types';
+import { getLevelContent } from '@/content/shared/levelContent';
+import { JLPT_LEVELS, isLevelSelectable } from '@/content/shared/registry';
+import { JLPTLevel, LessonCurriculumItem } from '@/content/shared/types';
 
 export default function RoadmapPage() {
-  const { progress, preferences } = useApp();
+  const { preferences, profile, updateProfile, getLevelProgress } = useApp();
+  const level = profile.currentLevel;
+  const { curriculum, phases } = getLevelContent(level);
+  const levelProgress = getLevelProgress(level);
   const [selectedPhase, setSelectedPhase] = useState<number | 'all'>('all');
 
-  const currentLessonId = progress.currentLessonId || 1;
-  const completedList = progress.completedLessons || [];
+  const currentLessonId = levelProgress.currentLessonId || 1;
+  const completedList = levelProgress.completedLessons || [];
   const completedCount = completedList.length;
-  const totalLessons = LESSONS_CURRICULUM.length;
+  const totalLessons = curriculum.length;
   const percentComplete = Math.round((completedCount / totalLessons) * 100);
 
   const filteredLessons =
     selectedPhase === 'all'
-      ? LESSONS_CURRICULUM
-      : LESSONS_CURRICULUM.filter((l) => l.phase === selectedPhase);
+      ? curriculum
+      : curriculum.filter((l) => l.phase === selectedPhase);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-10">
@@ -44,13 +48,13 @@ export default function RoadmapPage() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 text-xs font-semibold">
               <Map className="w-3.5 h-3.5" />
-              <span>Minna no Nihongo I • N5 Curriculum</span>
+              <span>Current active course: {level} • Goal: JLPT {profile.targetLevel}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
               Learning Roadmap <span className="font-jp text-lg text-slate-400 font-normal">(ロードマップ)</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-              25 sequential lessons guiding you from absolute Japanese beginner to confident JLPT N5 mastery.
+              {totalLessons} sequential lessons guiding you through JLPT {level}.
               Each lesson includes grammar, vocabulary, audio, exercises, and quizzes.
             </p>
           </div>
@@ -74,7 +78,7 @@ export default function RoadmapPage() {
               </span>
               <span>•</span>
               <span>
-                Target: <strong className="text-emerald-600 dark:text-emerald-400">JLPT N5</strong>
+                Target: <strong className="text-emerald-600 dark:text-emerald-400">JLPT {profile.targetLevel}</strong>
               </span>
             </div>
             <span className="font-bold text-brand-600 dark:text-brand-400">{percentComplete}% Complete</span>
@@ -88,6 +92,67 @@ export default function RoadmapPage() {
           </div>
         </div>
       </div>
+
+      <section aria-labelledby="level-roadmap-title" className="space-y-4">
+        <div>
+          <h2 id="level-roadmap-title" className="text-lg font-extrabold text-slate-900 dark:text-white">
+            Your N5–N1 learning path
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            Choose a level when its course is ready. Planned levels stay locked until their content and checks are complete.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {JLPT_LEVELS.map(({ level, status }) => {
+            const selectable = isLevelSelectable(level);
+            const isCurrent = profile.currentLevel === level;
+            const statusLabel = status === 'in-progress'
+              ? 'In progress'
+              : status === 'available' ? 'Available' : 'Planned';
+
+            return (
+              <div
+                key={level}
+                className={`rounded-2xl border p-4 space-y-3 ${
+                  isCurrent
+                    ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-950/30'
+                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-lg font-extrabold text-slate-900 dark:text-white">{level}</span>
+                  <span className={`text-[10px] font-bold ${selectable ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'}`}>
+                    {statusLabel}
+                  </span>
+                </div>
+                {selectable ? (
+                  <button
+                    type="button"
+                    aria-pressed={isCurrent}
+                    disabled={isCurrent}
+                    onClick={() => updateProfile({ currentLevel: level })}
+                    className="w-full rounded-lg bg-brand-600 px-2 py-2 text-[11px] font-bold text-white disabled:cursor-default disabled:bg-brand-100 disabled:text-brand-700 dark:disabled:bg-brand-950 dark:disabled:text-brand-300"
+                  >
+                    {isCurrent ? 'Current course' : 'Study this level'}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    aria-label={`${level} course planned and unavailable`}
+                    className="w-full cursor-not-allowed rounded-lg bg-slate-100 px-2 py-2 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      <Lock className="h-3 w-3" />
+                      Planned
+                    </span>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* 🌸 Foundation Step: Kana Pre-requisite Card */}
       <div className="p-6 rounded-3xl bg-gradient-to-r from-brand-50/80 via-sakura-50/40 to-emerald-50/40 dark:from-brand-950/40 dark:via-sakura-950/20 dark:to-emerald-950/20 border border-brand-200/80 dark:border-brand-800/60 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -137,10 +202,10 @@ export default function RoadmapPage() {
               : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
           }`}
         >
-          All 25 Lessons
+          All {curriculum.length} Lessons
         </button>
 
-        {CURRICULUM_PHASES.map((phase) => (
+        {phases.map((phase) => (
           <button
             key={phase.phase}
             type="button"
@@ -158,10 +223,10 @@ export default function RoadmapPage() {
 
       {/* 📚 Lessons Grid / Timeline Pathway */}
       <div className="space-y-8">
-        {CURRICULUM_PHASES.filter(
+        {phases.filter(
           (p) => selectedPhase === 'all' || p.phase === selectedPhase
         ).map((phase) => {
-          const phaseLessons = LESSONS_CURRICULUM.filter((l) => l.phase === phase.phase);
+          const phaseLessons = curriculum.filter((l) => l.phase === phase.phase);
 
           return (
             <div key={phase.phase} className="space-y-4">
@@ -300,18 +365,18 @@ export default function RoadmapPage() {
         })}
       </div>
 
-      {/* 🏆 Milestone Capstone: JLPT N5 Official Examination Banner */}
+      {/* Current-level practice milestone */}
       <div className="p-8 rounded-3xl bg-gradient-to-r from-torii-600 via-brand-600 to-sakura-600 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-md">
             <Award className="w-3.5 h-3.5" />
-            <span>Final Certification Milestone</span>
+            <span>{level} Practice Milestone</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold">
-            Full JLPT N5 Practice Examination Simulator
+            JLPT {level} Practice Set
           </h2>
           <p className="text-xs sm:text-sm text-white/90 max-w-2xl">
-            Simulate the exact official examination conditions: Language Knowledge (Vocabulary/Grammar), Reading Comprehension, and Listening drills with real-time scoring.
+            Work through an original timed set covering {level} vocabulary, grammar, reading, and listening. Results support practice and are not an official JLPT score prediction.
           </p>
         </div>
 

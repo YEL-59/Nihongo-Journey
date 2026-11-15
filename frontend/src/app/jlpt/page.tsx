@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Flag, Headphones, RotateCcw, Send } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { ExamSectionId, JLPTExamQuestion } from '@/content/shared/types';
-import { N5_EXAM_DURATION_SECONDS, N5_EXAM_QUESTIONS } from '@/content/levels/n5';
+import { ExamSectionId, JLPTExamQuestion, JLPTLevel } from '@/content/shared/types';
+import { getLevelContent } from '@/content/shared/levelContent';
 import { STORAGE_KEYS } from '@/lib/storage';
 
 const SECTIONS: Array<{ id: ExamSectionId; title: string; shortTitle: string }> = [
@@ -21,6 +21,7 @@ interface SectionScore {
 
 interface ExamAttempt {
   id: string;
+  level: JLPTLevel;
   completedAt: string;
   durationSeconds: number;
   correct: number;
@@ -50,9 +51,9 @@ function formatTime(seconds: number): string {
   return `${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`;
 }
 
-function calculateSections(answers: Record<string, number>) {
+function calculateSections(answers: Record<string, number>, examQuestions: JLPTExamQuestion[]) {
   return SECTIONS.reduce<Record<ExamSectionId, SectionScore>>((scores, section) => {
-    const questions = N5_EXAM_QUESTIONS.filter((question) => question.section === section.id);
+    const questions = examQuestions.filter((question) => question.section === section.id);
     scores[section.id] = {
       correct: questions.filter((question) => answers[question.id] === question.answerIndex).length,
       total: questions.length,
@@ -132,10 +133,12 @@ function storeAttempt(attempt: ExamAttempt, studyMinutes: number) {
 }
 
 export default function JLPTPage() {
-  const { isMounted, playSpeech } = useApp();
+  const { isMounted, playSpeech, profile } = useApp();
+  const level = profile.currentLevel;
+  const { examDurationSeconds, examQuestions } = getLevelContent(level);
   const [isActive, setIsActive] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [secondsRemaining, setSecondsRemaining] = useState(N5_EXAM_DURATION_SECONDS);
+  const [secondsRemaining, setSecondsRemaining] = useState(examDurationSeconds);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [flagged, setFlagged] = useState<string[]>([]);
@@ -143,11 +146,11 @@ export default function JLPTPage() {
   const savedAttempt = useRef(false);
   const deadline = useRef<number | null>(null);
 
-  const currentQuestion = N5_EXAM_QUESTIONS[currentIndex];
-  const sectionScores = useMemo(() => calculateSections(answers), [answers]);
-  const correctCount = N5_EXAM_QUESTIONS.filter((question) => answers[question.id] === question.answerIndex).length;
+  const currentQuestion = examQuestions[currentIndex];
+  const sectionScores = useMemo(() => calculateSections(answers, examQuestions), [answers, examQuestions]);
+  const correctCount = examQuestions.filter((question) => answers[question.id] === question.answerIndex).length;
   const answeredCount = Object.keys(answers).length;
-  const percent = Math.round((correctCount / N5_EXAM_QUESTIONS.length) * 100);
+  const percent = Math.round((correctCount / examQuestions.length) * 100);
   const activeSection = SECTIONS.find((section) => section.id === currentQuestion?.section);
 
   function submitExam() {
@@ -174,26 +177,27 @@ export default function JLPTPage() {
   useEffect(() => {
     if (!isSubmitted || savedAttempt.current) return;
     savedAttempt.current = true;
-    const sections = calculateSections(answers);
-    const elapsedSeconds = Math.max(0, N5_EXAM_DURATION_SECONDS - secondsRemaining);
+    const sections = calculateSections(answers, examQuestions);
+    const elapsedSeconds = Math.max(0, examDurationSeconds - secondsRemaining);
     const attempt: ExamAttempt = {
-      id: `n5-${Date.now()}`,
+      id: `${level.toLowerCase()}-${Date.now()}`,
+      level,
       completedAt: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
-      correct: N5_EXAM_QUESTIONS.filter((question) => answers[question.id] === question.answerIndex).length,
-      total: N5_EXAM_QUESTIONS.length,
+      correct: examQuestions.filter((question) => answers[question.id] === question.answerIndex).length,
+      total: examQuestions.length,
       sections,
     };
     setSaveError(storeAttempt(attempt, Math.max(0.1, Math.round((elapsedSeconds / 60) * 10) / 10)) ?? '');
-  }, [answers, isSubmitted, secondsRemaining]);
+  }, [answers, isSubmitted, secondsRemaining, examDurationSeconds, examQuestions, level]);
 
   function startExam() {
     savedAttempt.current = false;
-    deadline.current = Date.now() + N5_EXAM_DURATION_SECONDS * 1000;
+    deadline.current = Date.now() + examDurationSeconds * 1000;
     setAnswers({});
     setFlagged([]);
     setCurrentIndex(0);
-    setSecondsRemaining(N5_EXAM_DURATION_SECONDS);
+    setSecondsRemaining(examDurationSeconds);
     setSaveError('');
     setIsSubmitted(false);
     setIsActive(true);
@@ -206,7 +210,7 @@ export default function JLPTPage() {
   }
 
   function moveToSection(sectionId: ExamSectionId) {
-    const index = N5_EXAM_QUESTIONS.findIndex((question) => question.section === sectionId);
+    const index = examQuestions.findIndex((question) => question.section === sectionId);
     if (index >= 0) setCurrentIndex(index);
   }
 
@@ -223,7 +227,7 @@ export default function JLPTPage() {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="rounded-3xl bg-gradient-to-br from-amber-600 via-orange-600 to-rose-700 p-6 text-white shadow-xl sm:p-8">
-          <div className="flex items-center gap-2 text-sm font-semibold text-white/75"><AwardIcon />JLPT N5 practice center</div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-white/75"><AwardIcon level={level} />JLPT {level} practice center</div>
           <h1 className="mt-3 text-3xl font-black sm:text-4xl">Ready for a quick mock?</h1>
           <p className="mt-2 max-w-2xl text-sm text-white/80">
             Practice vocabulary, kanji, grammar, reading, and listening in one timed set.
@@ -232,7 +236,7 @@ export default function JLPTPage() {
 
         <section className="grid gap-4 md:grid-cols-3">
           {SECTIONS.map((section) => {
-            const count = N5_EXAM_QUESTIONS.filter((question) => question.section === section.id).length;
+            const count = examQuestions.filter((question) => question.section === section.id).length;
             return (
               <article key={section.id} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
                 <h2 className="font-bold text-slate-900 dark:text-white">{section.title}</h2>
@@ -243,9 +247,9 @@ export default function JLPTPage() {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">18-minute N5 practice set</h2>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">{Math.round(examDurationSeconds / 60)}-minute {level} practice set</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            {N5_EXAM_QUESTIONS.length} questions across the three exam areas. Unanswered questions are scored as incorrect; you can flag items and return before submitting.
+            {examQuestions.length} questions across the three exam areas. Unanswered questions are scored as incorrect; you can flag items and return before submitting.
           </p>
           <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
             This original practice set uses a 60% learning benchmark. It is not an official JLPT exam or scaled-score prediction.
@@ -273,7 +277,7 @@ export default function JLPTPage() {
         <header className={`rounded-3xl p-6 text-white shadow-xl sm:p-8 ${passed ? 'bg-gradient-to-br from-emerald-700 to-teal-800' : 'bg-gradient-to-br from-indigo-700 to-violet-800'}`}>
           <div className="flex items-center gap-2 text-sm font-semibold text-white/75"><CheckCircle2 className="h-4 w-4" />Practice complete</div>
           <h1 className="mt-3 text-3xl font-black">{passed ? 'Nice work—practice benchmark reached.' : 'Good practice. Review and try again.'}</h1>
-          <p className="mt-2 text-sm text-white/80">{correctCount} of {N5_EXAM_QUESTIONS.length} correct · {percent}% · {answeredCount} answered</p>
+          <p className="mt-2 text-sm text-white/80">{correctCount} of {examQuestions.length} correct · {percent}% · {answeredCount} answered</p>
           <p className="mt-3 text-xs text-white/70">This is an unscaled practice result, not an official JLPT pass prediction.</p>
         </header>
 
@@ -301,7 +305,7 @@ export default function JLPTPage() {
 
         <section className="space-y-3">
           <h2 className="text-xl font-black text-slate-900 dark:text-white">Answer review</h2>
-          {N5_EXAM_QUESTIONS.map((question, index) => {
+          {examQuestions.map((question, index) => {
             const selected = answers[question.id];
             const correct = selected === question.answerIndex;
             return (
@@ -336,7 +340,7 @@ export default function JLPTPage() {
       <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300">{activeSection.shortTitle}</p>
-          <h1 className="mt-1 text-xl font-black text-slate-900 dark:text-white">N5 Timed Practice</h1>
+          <h1 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{level} Timed Practice</h1>
         </div>
         <div className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-lg font-black ${secondsRemaining <= 60 ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100'}`} aria-live="polite">
           <Clock3 className="h-5 w-5" />
@@ -347,7 +351,7 @@ export default function JLPTPage() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
         <main className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900 sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Question {currentIndex + 1} of {N5_EXAM_QUESTIONS.length}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Question {currentIndex + 1} of {examQuestions.length}</p>
             <button
               type="button"
               onClick={() => toggleFlag(currentQuestion.id)}
@@ -398,8 +402,8 @@ export default function JLPTPage() {
             >
               <ArrowLeft className="h-4 w-4" />Previous
             </button>
-            {currentIndex < N5_EXAM_QUESTIONS.length - 1 ? (
-              <button type="button" onClick={() => setCurrentIndex((index) => Math.min(N5_EXAM_QUESTIONS.length - 1, index + 1))} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500">
+            {currentIndex < examQuestions.length - 1 ? (
+              <button type="button" onClick={() => setCurrentIndex((index) => Math.min(examQuestions.length - 1, index + 1))} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500">
                 Next <ArrowRight className="h-4 w-4" />
               </button>
             ) : (
@@ -414,10 +418,10 @@ export default function JLPTPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-slate-900 dark:text-white">Question palette</h2>
-              <span className="text-xs text-slate-500">{answeredCount}/{N5_EXAM_QUESTIONS.length} answered</span>
+              <span className="text-xs text-slate-500">{answeredCount}/{examQuestions.length} answered</span>
             </div>
             <div className="mt-4 grid grid-cols-4 gap-2">
-              {N5_EXAM_QUESTIONS.map((question, index) => (
+              {examQuestions.map((question, index) => (
                 <button
                   key={question.id}
                   type="button"
@@ -449,6 +453,6 @@ export default function JLPTPage() {
   );
 }
 
-function AwardIcon() {
-  return <span aria-hidden="true" className="text-sm">N5</span>;
+function AwardIcon({ level }: { level: string }) {
+  return <span aria-hidden="true" className="text-sm">{level}</span>;
 }

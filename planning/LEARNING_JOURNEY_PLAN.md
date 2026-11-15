@@ -6,10 +6,10 @@ Expand Nihongo Journey from its current N5-first prototype into a clear, sustain
 
 ## Current-state analysis
 
-- The project brief describes beginner-to-N3 goals; the developer's current goal extends the destination to N1. N4, N2, and N1 are not yet represented as complete curriculum levels.
-- The curriculum dataset contains 25 N5 lesson summaries, but detailed lesson content currently exists only for Lessons 1 and 2. Other lesson routes rely on fallback content.
+- The project brief described an initial beginner-to-N3 release; the developer's current goal extends the product to N1. N4, N3, N2, and N1 currently have metadata only.
+- The current N5 package has detailed lesson records for all 25 lessons, about 156 vocabulary entries, about 103 kanji, grammar coverage across all 25 lessons, and an original 12-question practice set. Reading and listening each have only three activities and speaking has four prompts, so those skill labs and the coverage/quality checks still need expansion.
 - The 12-section player is a useful starting structure, but it does not yet ensure every scored exercise is presented. A lesson can also be marked complete when it has no quiz challenges, and lesson navigation is not gated by completion.
-- Navigation advertises several learning areas whose routes are not implemented yet. This should be treated as planned scope, not finished functionality.
+- The main frontend routes exist, but most learning routes directly import N5 data. The level registry and planned-level metadata are not yet connected to a learner-facing selector or shared level-aware content routing.
 - The current release is local-first and uses browser storage. Keep that working independently of any later account or cloud-sync work.
 
 ## Product principles
@@ -57,7 +57,7 @@ The shared registry must know about all five levels, but a level is not selectab
 
 Move the current N5 curriculum, lesson details, vocabulary, kanji, and new skill-lab material into the N5 package as the foundation is implemented. Keep kana and UI primitives shared. N4, N3, N2, and N1 packages should be populated and reviewed one level at a time; do not seed them with empty or misleading “complete” content.
 
-**Implementation status:** The shared contracts, ordered N5–N1 registry, common kana package, and level folders are in place. N5 exports its curriculum, lesson details, vocabulary, kanji, grammar, reading, listening, and speaking content; N4–N1 currently contain level metadata only and remain planned. This is a structural foundation, not complete N5–N1 coverage: N5 still needs comprehensive lesson and skill content before it can be marked available.
+**Implementation status:** The shared contracts, ordered N5–N1 registry, common kana package, and level folders are in place. N5 has content across all major learning areas and the 25-lesson course; its level status remains `in-progress` pending skill breadth and quality gates. N4–N1 currently contain level metadata only and remain planned. Do not equate folders, UI routes, or raw item counts with a complete course.
 
 ## Recommended learner journey
 
@@ -91,7 +91,7 @@ flowchart TD
 
 **Exit check:** The data model can represent N5–N1 without level-specific page duplication; unavailable content cannot appear complete.
 
-### Phase 1 — Make the existing N5 journey reliable
+### Phase 1 — Make the existing N5 journey complete and reliable
 
 - Complete original, reviewed content for all 25 N5 lessons before presenting the N5 course as complete.
 - Ensure all counted questions are visible and answerable; persist attempts and explanations; use a clear pass/retry flow.
@@ -127,6 +127,8 @@ Keep the experience consistent while increasing reading length, grammar complexi
 
 **Exit check per level:** The level has a published roadmap, complete learning and assessment coverage, working prerequisites, and accurate progress reporting.
 
+For each level, create and review a coverage matrix before authoring bulk content. Track outcomes across grammar functions, vocabulary contexts, kanji/compound use, reading genres, listening situations, speaking tasks, and assessment skills. Use original JLPT-aligned material with Bangla and English explanations and Japanese examples. Do not copy textbook passages or official JLPT questions, and do not claim a definitive official word/kanji list where no official list exists. Use browser speech synthesis as the current pronunciation demo; native recordings remain deferred until an authorized source is selected.
+
 ### Phase 4 — Accounts and cross-device continuity (decision pending)
 
 - Only after the local-first journey works end-to-end, add optional account creation and secure progress synchronization if the product needs it.
@@ -143,19 +145,20 @@ Keep the experience consistent while increasing reading length, grammar complexi
 
 Reuse existing routes where practical instead of adding a separate page for every feature.
 
-## Recommended implementation order
+## Frontend-first implementation sequence
 
-1. Establish the shared N5-N1 content contracts, level registry, and level-specific folder structure.
-2. Complete and quality-check the N5 curriculum across lessons, vocabulary, grammar, kanji, reading, listening, speaking, and assessment.
-3. Finish the shared learning tools against the N5 package; close lesson-player scoring, progression, and review gaps.
-4. Populate, verify, and publish N4, then N3, then N2, then N1 using the same contracts and shared tools.
-5. Decide whether optional accounts and cloud sync are needed after the local-first journey works end-to-end.
+1. **Level navigation and availability:** distinguish a learner's current study level from their target JLPT, show N5–N1 status in onboarding and roadmap, and keep planned levels visibly locked. Connect existing level metadata to the shared UI.
+2. **Shared level routing and progress boundaries:** resolve curriculum and skill content by selected level; give level-specific learning progress, reviews, bookmarks, and quiz attempts stable IDs/namespaces; preserve existing N5 local data with a safe migration.
+3. **N5 completion gate:** audit existing content rather than replacing it. Close missing skill-practice and assessment gaps, validate all records and exercise answers, verify lesson progression and local persistence, then mark N5 available only when the acceptance matrix passes.
+4. **N4 → N3 → N2 → N1, strictly sequentially:** for each level, author a coverage matrix and original content package, connect it to shared routes, test exercises and saved progress, and pass the level gate before starting publication of the next level. Future-level cards can be visible as planned without exposing incomplete lessons.
+5. **Frontend release gate:** test every level's roadmap, lesson flow, skill labs, quiz/exam, progress reporting, empty/error/loading states, and mobile/desktop navigation. Run frontend production build and content-integrity checks.
+6. **Backend and cloud work later:** keep tasks 009–012 blocked behind frontend completion; do not make backend work a prerequisite for the local-first N5–N1 experience.
 
-## Decisions required before scheduling level expansion
+## Decisions and constraints for level expansion
 
 - Confirm whether Bangla + English + Japanese remains the language set for the N5–N1 product.
 - Confirm that higher levels should be released sequentially after N5 quality gates, rather than presented as available in parallel.
-- Identify authorized content sources or approve original JLPT-aligned content; do not reproduce restricted textbook or exam material.
+- The developer requested the missing levels and content. Use original JLPT-aligned material; do not reproduce restricted textbook or official exam material. Keep content provenance clear.
 - Decide whether guest/local-first learning remains the default and accounts/sync are deferred.
 
-This is a product plan, not an implementation approval. Keep the existing task board unchanged until the developer confirms the decisions and asks to schedule or execute the next work.
+The developer has requested a frontend-first plan and implementation. Track each level as a separate task, and do not mark a level available until its content and verification gates pass.
